@@ -1,0 +1,5 @@
+github:
+  target: default
+  outputs:
+   default:
+     type: duckdb
