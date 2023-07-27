@@ -1,0 +1,6 @@
+version: 2
+
+sources:
+- name: github
+  tables:
+  - name: pull_requests
