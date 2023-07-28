@@ -20,3 +20,7 @@ models:
     marts:
       +materialized: table
       +schema: marts
+
+vars:
+  authors:
+  - JCZuurmond

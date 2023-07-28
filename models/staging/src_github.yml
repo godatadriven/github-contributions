@@ -5,5 +5,6 @@ sources:
   schema: main
   meta:
     plugin: github_contributions
+    authors: "{{ var('authors') }}"
   tables:
   - name: src_pull_requests

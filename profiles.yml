@@ -9,5 +9,3 @@ github:
        alias: github_contributions
        config:
          info: true
-         authors:
-         - JCZuurmond
