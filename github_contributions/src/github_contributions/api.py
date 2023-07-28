@@ -1,10 +1,42 @@
-from typing import Optional
+import re
+from typing import Any, Optional
 
 import pandas as pd
 import requests
+from requests.models import Response
 
 
 GITHUB_API_BASE_URL = "https://api.github.com"
+
+
+def paginate(url: str, **request_arguments: Any) -> Response:
+    """Paginate a request
+
+    Parameters
+    ------------
+    url : str
+        The url to paginate
+    request_arguments : Any
+        The request arguments
+
+    Yields
+    ------
+    out : Response
+        The response
+    """
+    regex = re.compile('.*<([^>]+)>; rel="next"')
+    match_next = True
+
+    while match_next:
+        response = requests.get(url, **request_arguments)
+
+        yield response
+
+        link_header = response.headers.get("Link")
+        match_next = link_header and regex.match(link_header)
+
+        if match_next:
+            url = match_next.group(1)
 
 
 def create_headers(authorization_token: Optional[str] = None) -> dict[str, str]:
@@ -51,7 +83,9 @@ def search_author_public_pull_requests(
         The author's public pull requests
     """
     search_url = f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
+    search_pagination = paginate(search_url, headers=headers)
 
-    response = requests.get(search_url, headers=headers)
-    df = pd.DataFrame(response.json()["items"])
+    df = pd.concat(
+        (pd.DataFrame(repsonse.json()["items"]) for repsonse in search_pagination)
+    )
     return df
