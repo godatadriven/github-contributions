@@ -1,0 +1,51 @@
+name: "Run dbt"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+
+env:
+  DBT_PROFILES_DIR: .
+  DUCKDB_PATH: github_contributions.duckdb
+  PYTHON_VERSION: 3.9
+
+jobs:
+  dbt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install dbt-duckdb
+        python -m pip install github_contributions/
+
+    - name: dbt build
+      run: dbt build
+
+    - name: Delete duckdb database
+      run: |
+        if [ -e "${{ env.DUCKDB_PATH }}" ]; then
+          rm "${{ env.DUCKDB_PATH }}"
+        fi
+      if: ${{ failure() }}
+
+    - name: Upload duckdb
+      uses: actions/upload-artifact@v2
+      with:
+        name: github_contributions.duckdb
+        path: ${{ env.DUCKDB_PATH }}
+
+        # CHANGE WITH CAUSION!!!
+        # The retention days determines how long it takes for author data to be
+        # forgotten
+        retention-days: 15
+      if: ${{ success() }}
