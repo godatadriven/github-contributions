@@ -39,7 +39,9 @@ def wait_for_rate_limit_to_reset(response: Response) -> Response:
     if rate_limit == "0" or message == rate_limit_exceeded_message:
         rate_limit_reset = int(response.headers.get("X-RateLimit-Reset"))
         wait_time = int(rate_limit_reset - time.time() + wait_buffer + 1)
-        logger.info("Waiting %s seconds for Github API rate limit to reset", wait_time)
+        logger.info(
+            "Waiting %s seconds for Github API rate limit to reset", wait_time
+        )
         time.sleep(max(wait_time, wait_buffer))
     else:
         response.raise_for_status()
@@ -64,7 +66,6 @@ def paginate(url: str, **request_arguments: Any) -> Response:
     match_next = True
 
     while match_next:
-
         response = requests.get(url, **request_arguments)
         while not response.ok:
             wait_for_rate_limit_to_reset(response)
@@ -79,7 +80,9 @@ def paginate(url: str, **request_arguments: Any) -> Response:
             url = match_next.group(1)
 
 
-def create_headers(authorization_token: Optional[str] = None) -> dict[str, str]:
+def create_headers(
+    authorization_token: Optional[str] = None,
+) -> dict[str, str]:
     """Create the API headers.
 
     Parameters
@@ -104,7 +107,10 @@ def create_headers(authorization_token: Optional[str] = None) -> dict[str, str]:
 
 
 def search_author_public_pull_requests(
-    author: str, *, headers: dict[str, str], per_page: int = 100,
+    author: str,
+    *,
+    headers: dict[str, str],
+    per_page: int = 100,
 ) -> pd.DataFrame:
     """Search for the public pull requests of an author.
 
@@ -122,10 +128,16 @@ def search_author_public_pull_requests(
     out : pd.DataFrame
         The author's public pull requests
     """
-    search_url = f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
+    search_url = (
+        f"{GITHUB_API_BASE_URL}/search/issues?"
+        f"per_page={per_page}&q=is:public+is:pr+author:{author}"
+    )
     search_pagination = paginate(search_url, headers=headers)
 
     df = pd.concat(
-        (pd.DataFrame(repsonse.json()["items"]) for repsonse in search_pagination)
+        (
+            pd.DataFrame(repsonse.json()["items"])
+            for repsonse in search_pagination
+        )
     )
     return df
