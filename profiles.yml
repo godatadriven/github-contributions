@@ -6,3 +6,6 @@ github:
      path: github_contributions.duckdb
      plugins:
      - module: github_contributions.plugin
+       alias: pull_requests
+       config:
+         info: true

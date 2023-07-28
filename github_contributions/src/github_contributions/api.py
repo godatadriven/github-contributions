@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from typing import Any, Optional
@@ -30,12 +31,15 @@ def wait_for_rate_limit_to_reset(response: Response) -> Response:
         "Please wait a few minutes before you try again."
     )
 
+    logger = logging.getLogger(__name__)
+
     rate_limit = response.headers.get("X-RateLimit-Remaining")
     message = response.json().get("message")
 
     if rate_limit == "0" or message == rate_limit_exceeded_message:
         rate_limit_reset = int(response.headers.get("X-RateLimit-Reset"))
-        wait_time = rate_limit_reset - time.time() + wait_buffer
+        wait_time = int(rate_limit_reset - time.time() + wait_buffer + 1)
+        logger.info("Waiting %s seconds for Github API rate limit to reset", wait_time)
         time.sleep(max(wait_time, wait_buffer))
     else:
         response.raise_for_status()
