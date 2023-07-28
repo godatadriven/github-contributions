@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import time
 from typing import Any
 
 import pandas as pd
@@ -44,6 +45,7 @@ def setup_logger(info: bool = False, debug: bool = False) -> None:
     logger = logging.getLogger(package_name)
 
     formatter = logging.Formatter(log_format, datefmt=date_format)
+    formatter.converter = time.gmtime
 
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
