@@ -1,16 +1,14 @@
-import requests
 from typing import Any
 
 import pandas as pd
+import requests
 from dbt.adapters.duckdb.plugins import BasePlugin
 from dbt.adapters.duckdb.utils import SourceConfig
 
+from . import api as github_api
+
 
 class Plugin(BasePlugin):
-    search_url = (
-        "https://api.github.com/search/issues?per_page=100&q=is:public+is:pr"
-    )
-
     def initialize(self, plugin_config: dict[str, Any]) -> None:
         headers = {
             "Accept": "application/vnd.github+json",
@@ -25,9 +23,7 @@ class Plugin(BasePlugin):
 
     def load(self, source_config: SourceConfig) -> pd.DataFrame:
         author = source_config.name
-        response = requests.get(
-            f"{self.search_url}+author:{author}",
-            headers=self.headers,
+        df = github_api.search_author_public_pull_requests(
+            author, headers=self.headers
         )
-        df = pd.DataFrame(response.json()["items"])
         return df
