@@ -4,3 +4,5 @@ github:
    default:
      type: duckdb
      path: github_contributions.duckdb
+     plugins:
+     - module: github_contributions.pull_requests
