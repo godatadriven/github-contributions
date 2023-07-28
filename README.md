@@ -15,10 +15,14 @@ This is enforced by:
 - not authenticating to the Github API
 - AND explicitly query for public contributions
 
-## Data access
+### Data access
 
 The contributions are made **publicly** available as a Duckdb file through
 the artifacts in Github actions.
+
+### Data freshness
+
+The data is updated every Thursday at noon UTC time.
 
 ## Track your Github contributions
 
