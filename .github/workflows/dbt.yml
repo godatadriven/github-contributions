@@ -5,6 +5,8 @@ on:
   push:
     branches:
     - main
+  schedule:
+   - cron: '0 12 * * 4'  # Every Thursday at noon
 
 env:
   DBT_PROFILES_DIR: .
