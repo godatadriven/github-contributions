@@ -1,1 +1,1 @@
-SELECT * FROM {{ source('pull_requests', 'JCZuurmond') }}
+SELECT * FROM {{ source('github_contributions', 'pull_requests') }}
