@@ -107,8 +107,7 @@ def create_headers(
 
 
 def search_author_public_pull_requests(
-    author: str,
-    *,
+    *authors: str,
     headers: dict[str, str],
     per_page: int = 100,
 ) -> pd.DataFrame:
@@ -116,8 +115,8 @@ def search_author_public_pull_requests(
 
     Parameters
     ----------
-    author : str
-        The author
+    authors : str
+        The authors
     headers : dict[str, str]
         The API call headers
     per_page : int (default: 100)
@@ -128,16 +127,12 @@ def search_author_public_pull_requests(
     out : pd.DataFrame
         The author's public pull requests
     """
-    search_url = (
-        f"{GITHUB_API_BASE_URL}/search/issues?"
-        f"per_page={per_page}&q=is:public+is:pr+author:{author}"
-    )
-    search_pagination = paginate(search_url, headers=headers)
-
+    search_url = f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
     df = pd.concat(
         (
-            pd.DataFrame(repsonse.json()["items"])
-            for repsonse in search_pagination
+            pd.DataFrame(response.json()["items"])
+            for author in authors
+            for response in paginate(f"{search_url}+author:{author}", headers=headers)
         )
     )
     return df

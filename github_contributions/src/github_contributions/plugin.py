@@ -68,10 +68,12 @@ class Plugin(BasePlugin):
         log_info = plugin_config.get("info", False)
         log_debug = plugin_config.get("debug", False)
         github_token = plugin_config.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
+        authors = plugin_config.get("authors", [])
 
         setup_logger(info=log_info, debug=log_debug)
 
         self.headers = github_api.create_headers(github_token)
+        self.authors = authors
 
     def load(self, source_config: SourceConfig) -> pd.DataFrame:
         """Load the data for a source.
@@ -85,9 +87,9 @@ class Plugin(BasePlugin):
         -------
         out : pd.DataFrame
             The public pull requests
+
         """
-        author = source_config.name
         df = github_api.search_author_public_pull_requests(
-            author, headers=self.headers
+            *self.authors, headers=self.headers
         )
         return df
