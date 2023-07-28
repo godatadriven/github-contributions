@@ -1,0 +1,15 @@
+SELECT
+    title,
+    body,
+    user_login AS author,
+    author_association,
+    state,
+    draft,
+    comments,
+    created_at,
+    updated_at,
+    closed_at,
+    reactions_total_count,
+    pull_request_merged_at AS merged_at,
+    html_url AS url,
+FROM {{ ref("stg_pull_requests") }}
