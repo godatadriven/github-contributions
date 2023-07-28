@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import pandas as pd
@@ -10,16 +11,8 @@ from . import api as github_api
 
 class Plugin(BasePlugin):
     def initialize(self, plugin_config: dict[str, Any]) -> None:
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-
-        bearer_token = plugin_config.get("GITHUB_TOKEN")
-        if bearer_token:
-            headers["Authorization"] = f"Bearer {bearer_token}"
-
-        self.headers = headers
+        github_token = plugin_config.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
+        self.headers = github_api.create_headers(github_token)
 
     def load(self, source_config: SourceConfig) -> pd.DataFrame:
         author = source_config.name

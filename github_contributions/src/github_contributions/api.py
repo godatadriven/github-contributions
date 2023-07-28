@@ -1,8 +1,34 @@
+from typing import Optional
+
 import pandas as pd
 import requests
 
 
 GITHUB_API_BASE_URL = "https://api.github.com"
+
+
+def create_headers(authorization_token: Optional[str] = None) -> dict[str, str]:
+    """Create the API headers.
+
+    Parameters
+    ----------
+    authorization_token : Optional[str] (default : None)
+        The API authorization token
+
+    Returns
+    -------
+    out : dict[str, str]
+        The API headers
+    """
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+    if authorization_token is not None:
+        headers["Authorization"] = f"Bearer {authorization_token}"
+
+    return headers
 
 
 def search_author_public_pull_requests(
