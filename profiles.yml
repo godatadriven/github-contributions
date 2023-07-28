@@ -3,3 +3,4 @@ github:
   outputs:
    default:
      type: duckdb
+     path: github_contributions.duckdb
