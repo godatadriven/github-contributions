@@ -27,7 +27,7 @@ Add your Github handle to the `authors` variable in the
 
 Contributions are only tracked when a Github user opted-in:
 1. A Github handle is added through a pull request.
-2. The Github user approves the pull request that adds his or his Github handle.
+2. The Github user approves the pull request that adds hers or his Github handle.
 3. Git and Github is used for auditing.
 
 ## **STOP** tracking your Github contributions
@@ -36,8 +36,8 @@ Remove your Github handle from the `authors` variable in the
 [dbt_project.yml](./dbt_project.yml) to stop tracking your Github contributions.
 
 Github users can decide to stop tracking their contributions at any time:
-1. A Github handle is removed throuhgh a pull request.
-2. A Github user approves the pull request that removes his or his Github handle.
+1. A Github handle is removed through a pull request.
+2. A Github user approves the pull request that removes hers or his Github handle.
 3. Git and Github is used for auditing.
 
 ### Data retention
