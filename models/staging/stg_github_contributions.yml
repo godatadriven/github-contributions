@@ -1,0 +1,9 @@
+version: 2
+
+models:
+- name: stg_pull_requests
+  columns:
+  - name: user_login
+    tests:
+    - accepted_values:
+        values: "{{ var('authors') }}"
