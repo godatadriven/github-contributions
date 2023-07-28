@@ -153,4 +153,4 @@ SELECT
     CAST(state_reason AS INTEGER) AS state_reason,
     CAST(score AS DOUBLE) AS score,
 
-FROM {{ source('github_contributions', 'pull_requests') }}
+FROM {{ source('github_contributions', 'src_pull_requests') }}

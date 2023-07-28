@@ -6,4 +6,4 @@ sources:
   meta:
     plugin: github_contributions
   tables:
-  - name: pull_requests
+  - name: src_pull_requests
