@@ -1,4 +1,5 @@
 import re
+import time
 from typing import Any, Optional
 
 import pandas as pd
@@ -7,6 +8,37 @@ from requests.models import Response
 
 
 GITHUB_API_BASE_URL = "https://api.github.com"
+
+
+def wait_for_rate_limit_to_reset(response: Response) -> Response:
+    """Wait for the rate limit to reset.
+
+    Parameters
+    ----------
+    response : Response
+        The response
+
+    Raises
+    ------
+    request.Error :
+        The requests error if the rate limit is not the issue
+    """
+    wait_buffer = 5
+    # The secondary rate limit is found through the following message
+    rate_limit_exceeded_message = (
+        "You have exceeded a secondary rate limit. "
+        "Please wait a few minutes before you try again."
+    )
+
+    rate_limit = response.headers.get("X-RateLimit-Remaining")
+    message = response.json().get("message")
+
+    if rate_limit == "0" or message == rate_limit_exceeded_message:
+        rate_limit_reset = int(response.headers.get("X-RateLimit-Reset"))
+        wait_time = rate_limit_reset - time.time() + wait_buffer
+        time.sleep(max(wait_time, wait_buffer))
+    else:
+        response.raise_for_status()
 
 
 def paginate(url: str, **request_arguments: Any) -> Response:
@@ -28,7 +60,11 @@ def paginate(url: str, **request_arguments: Any) -> Response:
     match_next = True
 
     while match_next:
+
         response = requests.get(url, **request_arguments)
+        while not response.ok:
+            wait_for_rate_limit_to_reset(response)
+            response = requests.get(url, **request_arguments)
 
         yield response
 
