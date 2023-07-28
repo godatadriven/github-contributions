@@ -12,4 +12,11 @@ clean-targets:
 
 models:
   github:
-    +materialized: table
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: ephemeral
+    marts:
+      +materialized: table
+      +schema: marts
