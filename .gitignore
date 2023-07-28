@@ -1,8 +1,10 @@
-
+# dbt
 target/
 dbt_packages/
 logs/
 .user.yml
+
+# Python
 *.egg-info
 
 # Duckdb
