@@ -1,6 +1,9 @@
 version: 2
 
 sources:
-- name: github
+- name: pull_requests
+  schema: main
+  meta:
+    plugin: pull_requests
   tables:
-  - name: pull_requests
+  - name: JCZuurmond
