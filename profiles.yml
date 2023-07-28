@@ -3,7 +3,7 @@ github:
   outputs:
    default:
      type: duckdb
-     path: ${{ env_var('DUCKDB_PATH') }}
+     path: "{{ env_var('DUCKDB_PATH') }}"
      plugins:
      - module: github_contributions.plugin
        alias: github_contributions
