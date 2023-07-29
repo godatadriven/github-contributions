@@ -87,8 +87,17 @@ class Plugin(BasePlugin):
             The public pull requests
 
         """
-        authors = source_config.get("authors", [])
-        df = github_api.search_author_public_pull_requests(
-            *authors, headers=self.headers
-        )
+        resource = source_config.get("resource")
+        if resource == "pull_requests":
+            authors = source_config.get("authors", [])
+            df = github_api.search_author_public_pull_requests(
+                *authors, headers=self.headers
+            )
+        elif resource == "repositories":
+            repositories = source_config.get("repositories", [])
+            df = github_api.get_repository(
+                *repositories, headers=self.headers
+            )
+        else:
+            raise ValueError(f"Unrecognized resource: {resource}")
         return df
