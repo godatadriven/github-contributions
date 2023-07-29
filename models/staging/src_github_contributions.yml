@@ -13,5 +13,4 @@ sources:
   - name: src_repositories
     meta:
       resource: repositories
-      repositories:
-      - dbt-labs/dbt-spark
+      repositories: "{{ var('repositories') }}"

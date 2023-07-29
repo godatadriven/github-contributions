@@ -27,3 +27,6 @@ models:
 vars:
   authors:
   - JCZuurmond
+
+  repositories:
+  - dbt-labs/dbt-spark
