@@ -3,6 +3,7 @@ SELECT
     body,
     user_login AS author,
     author_association,
+    owner_and_repository.full_repository_name,
     owner_and_repository.owner,
     owner_and_repository.repository,
     state,
