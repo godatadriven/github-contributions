@@ -29,4 +29,36 @@ vars:
   - JCZuurmond
 
   repositories:
+  - Detrous/darksky
+  - JCZuurmond/cloudoffice
+  - JCZuurmond/example-project-dsm
+  - JCZuurmond/jczuurmond.github.io
+  - JCZuurmond/openai
+  - JCZuurmond/pyjpeg
+  - JCZuurmond/soda-sql
+  - JCZuurmond/spark-utils
+  - PyDataAmsterdam/amsterdam.pydata.org
+  - andialbrecht/sqlparse
+  - anilkulkarni87/soda-spark
+  - chadgeary/cloudoffice
+  - databricks/terraform-provider-databricks
+  - datafold/datafold-docs
+  - dbt-labs/dbt-core
+  - dbt-labs/dbt-external-tables
   - dbt-labs/dbt-spark
+  - dbt-labs/docs.getdbt.com
+  - dbt-labs/spark-utils
+  - dbt-msft/dbt-sqlserver
+  - divolte/shop
+  - emacs-openai/openai
+  - godatadriven/dbt-excel
+  - godatadriven/pytest-dbt-core
+  - hashicorp/terraform-provider-azuread
+  - hgrif/ml-production
+  - jtclaypool/rats_and_onions
+  - koaning/scikit-fairness
+  - koaning/scikit-lego
+  - microsoft/dbt-synapse
+  - sodadata/docs
+  - sodadata/soda-core
+  - sodadata/soda-spark
