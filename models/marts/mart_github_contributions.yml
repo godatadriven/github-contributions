@@ -1,0 +1,9 @@
+version: 2
+
+models:
+- name: fct_pull_requests
+  columns:
+  - name: full_repository_name
+    tests:
+    - accepted_values:
+        values: "{{ var('repositories') }}"
