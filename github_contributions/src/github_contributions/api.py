@@ -136,3 +136,32 @@ def search_author_public_pull_requests(
         )
     )
     return df
+
+
+def get_repository(
+    *repositories: str,
+    headers: dict[str, str],
+) -> pd.DataFrame:
+    """Get a repository.
+
+    Parameters
+    ----------
+    repositories : str
+        The full name of the repositories, like "{owner}/{repo}".
+    headers : dict[str, str]
+        The API call headers
+
+    Returns
+    -------
+    out : pd.DataFrame
+        The repository
+    """
+    repo_url = f"{GITHUB_API_BASE_URL}/repos"
+    df = pd.DataFrame(
+        (
+            response.json()
+            for repository in repositories
+            for response in paginate(f"{repo_url}/{repository}", headers=headers)
+        )
+    )
+    return df
