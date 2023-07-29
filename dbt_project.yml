@@ -20,6 +20,9 @@ models:
     marts:
       +materialized: table
       +schema: marts
+    consumers:
+      +materialized: table
+      +schema: consumers
 
 vars:
   authors:
