@@ -4,3 +4,7 @@ models:
 - name: fct_pull_requests
   columns:
   - name: full_repository_name
+    tests:
+    - relationships:
+        to: ref('fct_repositories')
+        field: full_name
