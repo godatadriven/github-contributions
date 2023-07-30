@@ -12,7 +12,7 @@ SELECT
     created_at,
     updated_at,
     closed_at,
-    reactions_total_count,
     pull_request_merged_at AS merged_at,
+    reactions_total_count,
     html_url AS url,
 FROM {{ ref("int_pull_requests") }}
