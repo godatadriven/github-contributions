@@ -7,14 +7,6 @@ Keep track of your Github contributions!
 The following **public** Github contributions are tracked:
 1. Pull requests to repositories
 
-### Public contributions
-
-Only public contributions are tracked to avoid a potential data breach. 
-
-This is enforced by:
-- not authenticating to the Github API
-- AND explicitly query for public contributions
-
 ### Data access
 
 The contributions are made **publicly** available as a Duckdb file through
