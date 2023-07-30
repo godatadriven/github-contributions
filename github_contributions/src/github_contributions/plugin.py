@@ -55,6 +55,23 @@ def setup_logger(info: bool = False, debug: bool = False) -> None:
     logger.setLevel(log_level)
     logger.addHandler(handler)
 
+def extract_repositories_from_pull_requests(pull_requests: pd.DataFrame) -> list[str]:
+    """Extract repositories from pull requests
+
+    Parameters
+    ----------
+    pull_requests : pd.DataFrame
+        The pull requests
+
+    Returns
+    -------
+    list[str] :
+        The repositories
+    """
+    regex_pattern = "^https:\/\/github\.com\/((.+)\/(.+))\/pull\/\d+$"
+    repositories = pull_requests["html_url"].str.extract(regex_pattern)[0].unique()
+    return repositories
+
 
 class Plugin(BasePlugin):
     def initialize(self, plugin_config: dict[str, Any]) -> None:
@@ -75,6 +92,7 @@ class Plugin(BasePlugin):
         setup_logger(info=log_info, debug=log_debug)
 
         self.headers = frozendict.frozendict(github_api.create_headers(github_token))
+        self.repositories = None
 
         self.methods = {
             "pull_requests": github_api.search_author_public_pull_requests,
@@ -101,12 +119,24 @@ class Plugin(BasePlugin):
 
         """
         resource = source_config.get("resource")
-        if resource == "pull_requests":
+        get_repositories_from_pull_requests = source_config.get(
+            "get_repositories_from_pull_requests",
+            False,
+        )
+
+        df = None
+        if resource == "pull_requests" or get_repositories_from_pull_requests:
             authors = source_config.get("authors", [])
-            df = self.methods[resource](*authors, headers=self.headers)
-        elif resource == "repositories":
-            repositories = source_config.get("repositories", [])
-            df = self.methods[resource](*repositories, headers=self.headers)
-        else:
+            df = self.methods["pull_requests"](*authors, headers=self.headers)
+            self.repositories = extract_repositories_from_pull_requests(df)
+        if resource == "repositories":
+            if get_repositories_from_pull_requests:
+                repositories = self.repositories
+            else:
+                repositories = source_config.get("repositories", [])
+            df = self.methods["repositories"](*repositories, headers=self.headers)
+
+        if df is None:
             raise ValueError(f"Unrecognized resource: {resource}")
+
         return df
