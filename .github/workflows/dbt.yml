@@ -28,6 +28,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install dbt-duckdb github_contributions/
+        dbt deps
 
     - name: dbt build
       run: dbt build
