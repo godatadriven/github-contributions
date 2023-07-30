@@ -7,3 +7,8 @@ models:
     tests:
     - accepted_values:
         values: "{{ var('authors') }}"
+
+- name: stg_repositories
+  tests:
+  - dbt_utils.expression_is_true:
+      expression: "NOT private"
