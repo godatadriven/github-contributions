@@ -1,9 +1,11 @@
+import functools
 import logging
 import os
 import sys
 import time
 from typing import Any
 
+import frozendict
 import pandas as pd
 import requests
 from dbt.adapters.duckdb.plugins import BasePlugin
@@ -68,10 +70,21 @@ class Plugin(BasePlugin):
         log_info = plugin_config.get("info", False)
         log_debug = plugin_config.get("debug", False)
         github_token = plugin_config.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
+        use_cache = plugin_config.get("cache", False)
 
         setup_logger(info=log_info, debug=log_debug)
 
-        self.headers = github_api.create_headers(github_token)
+        self.headers = frozendict.frozendict(github_api.create_headers(github_token))
+
+        self.methods = {
+            "pull_requests": github_api.search_author_public_pull_requests,
+            "repositories": github_api.get_repository,
+        }
+        if use_cache:
+            self.methods = {
+                method: functools.cache(method_function)
+                for method, method_function in self.methods.items()
+            }
 
     def load(self, source_config: SourceConfig) -> pd.DataFrame:
         """Load the data for a source.
@@ -90,14 +103,10 @@ class Plugin(BasePlugin):
         resource = source_config.get("resource")
         if resource == "pull_requests":
             authors = source_config.get("authors", [])
-            df = github_api.search_author_public_pull_requests(
-                *authors, headers=self.headers
-            )
+            df = self.methods[resource](*authors, headers=self.headers)
         elif resource == "repositories":
             repositories = source_config.get("repositories", [])
-            df = github_api.get_repository(
-                *repositories, headers=self.headers
-            )
+            df = self.methods[resource](*repositories, headers=self.headers)
         else:
             raise ValueError(f"Unrecognized resource: {resource}")
         return df
