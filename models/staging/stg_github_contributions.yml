@@ -12,3 +12,9 @@ models:
   tests:
   - dbt_utils.expression_is_true:
       expression: "NOT private"
+  columns:
+  - name: visibility
+    tests:
+    - accepted_values:
+        values:
+        - public
