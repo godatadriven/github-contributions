@@ -3,6 +3,10 @@ version: 2
 models:
 - name: stg_pull_requests
   columns:
+  - name: url
+    tests:
+    - not_null
+    - unique
   - name: user_login
     tests:
     - accepted_values:
@@ -13,6 +17,10 @@ models:
   - dbt_utils.expression_is_true:
       expression: "NOT private"
   columns:
+  - name: full_name
+    tests:
+    - not_null
+    - unique
   - name: visibility
     tests:
     - accepted_values:
