@@ -1,3 +1,4 @@
 ### Checklist
 
-- [ ] When opting-in for tracking your Github contributions, approve the PR in Github.
+- [ ] When adding a Github handle to be tracked that is not yours, request the
+      user to approve the PR
