@@ -9,8 +9,7 @@ The following **public** Github contributions are tracked:
 
 ### Data access
 
-The contributions are made **publicly** available as a Duckdb file through
-the artifacts in Github actions.
+The contributions are made **publicly** available. 
 
 ### Data freshness
 
