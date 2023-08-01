@@ -17,27 +17,27 @@ The data is updated every Thursday at noon UTC time.
 
 ## Track your Github contributions
 
-Add your Github handle to the `authors` variable in the
+Add your Github handle and organization to the `authors` variable in the
 [dbt_project.yml](./dbt_project.yml) to track your Github contributions.
 
 Contributions are only tracked when a Github user opted-in. Git and Github is
 used for auditing.
 
-A Github handle is added through a pull request. The Github user:
-- Supplies the Github handle her- or himself through a PR
-- OR approves the pull request that adds its Github handle.
+A Github user is added through a pull request. The Github user:
+- Supplies the Github handle and organization her- or himself through a PR
+- OR approves the pull request that adds its Github handle and organization.
 
 ## **STOP** tracking your Github contributions
 
-Remove your Github handle from the `authors` variable in the
+Remove your Github handle and organization from the `authors` variable in the
 [dbt_project.yml](./dbt_project.yml) to stop tracking your Github contributions.
 
 Github users can decide to stop tracking their contributions at any time. Git
 and Github is used for auditing.
 
-A Github handle is removed through a pull request. The Github user:
-- Removes the Github handle her- or himself through a PR
-- OR approves the pull request that removes its Github handle.
+A Github user is removed through a pull request. The Github user:
+- Removes the Github handle and organization her- or himself through a PR
+- OR approves the pull request that removes its Github handle and organization.
 
 ### Data retention
 

@@ -10,7 +10,7 @@ models:
   - name: user_login
     tests:
     - accepted_values:
-        values: "{{ var('authors') }}"
+        values: "{{ var('author_string').split(',') }}"
 
 - name: stg_repositories
   tests:

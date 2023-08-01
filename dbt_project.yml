@@ -25,7 +25,11 @@ models:
       +schema: consumers
 
 vars:
+  author_string: "{% for author in var('authors') %}{{author.name}},{% endfor %}"
   authors:
-  - JCZuurmond
-  - jwills
-  - ManousogiannisM
+  - name: JCZuurmond
+    organization: Xebia
+  - name: jwills
+    organization: NA
+  - name: ManousogiannisM
+    organization: Xebia

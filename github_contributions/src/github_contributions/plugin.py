@@ -126,7 +126,7 @@ class Plugin(BasePlugin):
 
         df = None
         if resource == "pull_requests" or get_repositories_from_pull_requests:
-            authors = source_config.get("authors", [])
+            authors = {author["name"] for author in source_config.get("authors", [])}
             df = self.methods["pull_requests"](*authors, headers=self.headers)
             self.repositories = extract_repositories_from_pull_requests(df)
         if resource == "repositories":
