@@ -8,15 +8,15 @@
     <h1>Github Contributions</h1>
     <h3>Unique Contributors</h3>
     <ul>
-      {% for contributor in contributors %}
-      <li>{{ contributor }}</li>
+      {% for author in authors %}
+      <li>{{ author }}</li>
       {% endfor %}
     </ul>
 
     <h3>Pull Requests</h3>
     <ul>
-      {% for pr in pull_requests %}
-      <li><a href="{{ pr.html_url }}">{{ pr.title }}</a></li>
+      {% for title, url in titles_and_urls %}
+      <li><a href="{{ url }}">{{ title }}</a></li>
       {% endfor %}
     </ul>
   </body>
