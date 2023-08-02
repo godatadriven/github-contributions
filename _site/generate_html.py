@@ -10,13 +10,15 @@ INDEX_TEMPLATE = "index.html"
 
 def main():
     # Load data from github_contributions.duckdb into pandas dataframe
-    con = duckdb.connect(database="github_contributions.duckdb")
-    df = pd.read_sql_query("SELECT * FROM main_consumers_xebia.consm_xebia_pull_requests", con)
+    connection = duckdb.connect(database="github_contributions.duckdb")
+
+    pull_requests_sql = "SELECT * FROM main_consumers_xebia.consm_xebia_pull_requests"
+    pull_requests = pd.read_sql_query(pull_requests_sql, connection)
 
     # Load some pull request info for use in the html
-    df["username"] = df["user"].apply(lambda x: x["login"])
-    unique_contributors = df["username"].unique().tolist()
-    pull_requests = df[["title", "html_url"]].drop_duplicates().to_records(index=False)
+    pull_requests["username"] = pull_requests["user"].apply(lambda x: x["login"])
+    unique_contributors = pull_requests["username"].unique().tolist()
+    pull_requests = pull_requests[["title", "html_url"]].drop_duplicates().to_records(index=False)
 
     # generate html using jinja2
     env = Environment(loader=FileSystemLoader(TEMPLATES_PATH))
