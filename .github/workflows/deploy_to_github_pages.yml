@@ -15,6 +15,11 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  DBT_PROFILES_DIR: .
+  DUCKDB_PATH: github_contributions.duckdb
+  PYTHON_VERSION: 3.9
+
 jobs:
   deploy:
     environment:
@@ -22,14 +27,30 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: "_site/"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Download duckdb
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.DUCKDB_PATH }}
+
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install duckdb
+
+    - name: Generate site
+      run: _site/generate_html.py ${{ env.DUCKDB_PATH }} _site/index.html
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: "_site/"
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2

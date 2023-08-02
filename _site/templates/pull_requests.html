@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Github Contributions</title>
+  </head>
+  <body>
+    <h1>Github Contributions</h1>
+    <h3>Unique Contributors</h3>
+    <ul>
+      {% for author in authors %}
+      <li>{{ author }}</li>
+      {% endfor %}
+    </ul>
+
+    <h3>Pull Requests</h3>
+    <ul>
+      {% for title, url in titles_and_urls %}
+      <li><a href="{{ url }}">{{ title }}</a></li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

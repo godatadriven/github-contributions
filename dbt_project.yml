@@ -23,6 +23,8 @@ models:
     consumers:
       +materialized: table
       +schema: consumers
+      xebia:
+        +schema: consumers_xebia
 
 vars:
   author_string: "{% for author in var('authors') %}{{author.name}},{% endfor %}"
