@@ -11,7 +11,7 @@ INDEX_TEMPLATE = "index.html"
 def main():
     # Load data from github_contributions.duckdb into pandas dataframe
     con = duckdb.connect(database="github_contributions.duckdb")
-    df = pd.read_sql_query("SELECT * FROM src_pull_requests", con)
+    df = pd.read_sql_query("SELECT * FROM main_consumers_xebia.consm_xebia_pull_requests", con)
 
     # Load some pull request info for use in the html
     df["username"] = df["user"].apply(lambda x: x["login"])
