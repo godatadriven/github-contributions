@@ -23,20 +23,16 @@ def generate_html(duckdb_database: str | Path, output_file: str | Path) -> None:
     """
     connection = duckdb.connect(str(duckdb_database), read_only=True)
 
-    pull_requests_sql = (
-        "SELECT author, title, url "
-        "FROM main_consumers_xebia.consm_xebia_pull_requests"
-    )
-    pull_requests = connection.sql(pull_requests_sql).df()
+    pull_requests_table = "main_consumers_xebia.consm_xebia_pull_requests"
+    pull_requests = connection.table(pull_requests_table).to_df()
 
     unique_authors = pull_requests["author"].unique().tolist()
-    titles_and_urls = pull_requests[["title", "url"]].drop_duplicates().to_records(index=False)
 
     env = Environment(loader=FileSystemLoader(TEMPLATES_PATH))
     template = env.get_template(PULL_REQUESTS_TEMPLATE)
     html = template.render(
         authors=unique_authors,
-        titles_and_urls=titles_and_urls,
+        pull_requests=pull_requests.to_records()
     )
 
     output_path = Path(output_file)

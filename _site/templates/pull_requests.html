@@ -2,7 +2,7 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <title>Github Contributions</title>
+    <title>Xebia Github Contributions</title>
   </head>
   <body>
     <h1>Github Contributions</h1>
@@ -14,10 +14,61 @@
     </ul>
 
     <h3>Pull Requests</h3>
-    <ul>
-      {% for title, url in titles_and_urls %}
-      <li><a href="{{ url }}">{{ title }}</a></li>
+		<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+		Search: <input id="tableInput" onkeyup="searchTable()" type="text">
+		<table class="sortable" id="table">
+			<tr id="tableHeader">
+				<th>Author</th>
+				<th>Owner</th>
+				<th>Repository</th>
+				<th>Title</th>
+				<th>State</th>
+				<th>Created</th>
+				<th>Updated</th>
+				<th>Closed</th>
+				<th>Merged</th>
+				<th>Total reaction count</th>
+			</tr>
+      {% for pr in pull_requests %}
+			<tr class="item">
+				<td>{{ pr.author }}</td>
+				<td>{{ pr.owner }}</td>
+				<td>{{ pr.repository }}</td>
+				<td><a href="{{ pr.url }}" target="_blank">{{ pr.title }}</a></td>
+				<td>{{ pr.state }}</td>
+				<td>{{ pr.created_at }}</td>
+				<td>{{ pr.updated_at }}</td>
+				<td>{{ pr.closed_at }}</td>
+				<td>{{ pr.merged_at }}</td>
+				<td>{{ pr.reactions_total_count }}</td>
+			</tr>
       {% endfor %}
-    </ul>
+		</table>
   </body>
+
+	<script>
+	function searchTable() {
+			var input, filter, found, table, tr, td, i, j;
+			input = document.getElementById("tableInput");
+			filter = input.value.toUpperCase();
+			table = document.getElementById("table");
+			tr = table.getElementsByTagName("tr");
+			for (i = 0; i < tr.length; i++) {
+					td = tr[i].getElementsByTagName("td");
+					for (j = 0; j < td.length; j++) {
+							if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+									found = true;
+							}
+					}
+					if (found) {
+							tr[i].style.display = "";
+							found = false;
+					} else {
+							if (tr[i].id != 'tableHeader'){
+									tr[i].style.display = "none";
+							}
+					}
+			}
+	}
+	</script>
 </html>
