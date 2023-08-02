@@ -14,10 +14,34 @@
     </ul>
 
     <h3>Pull Requests</h3>
-    <ul>
-      {% for title, url in titles_and_urls %}
-      <li><a href="{{ url }}">{{ title }}</a></li>
+		<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+		<table class="sortable">
+			<tr>
+				<th>Author</th>
+				<th>Owner</th>
+				<th>Repository</th>
+				<th>Title</th>
+				<th>State</th>
+				<th>Created</th>
+				<th>Updated</th>
+				<th>Closed</th>
+				<th>Merged</th>
+				<th>Total reaction count</th>
+			</tr>
+      {% for pr in pull_requests %}
+			<tr class="item">
+				<td>{{ pr.author }}</td>
+				<td>{{ pr.owner }}</td>
+				<td>{{ pr.repository }}</td>
+				<td><a href="{{ pr.url }}" target="_blank">{{ pr.title }}</a></td>
+				<td>{{ pr.state }}</td>
+				<td>{{ pr.created_at }}</td>
+				<td>{{ pr.updated_at }}</td>
+				<td>{{ pr.closed_at }}</td>
+				<td>{{ pr.merged_at }}</td>
+				<td>{{ pr.reactions_total_count }}</td>
+			</tr>
       {% endfor %}
-    </ul>
+		</table>
   </body>
 </html>
