@@ -39,6 +39,8 @@ def generate_html(duckdb_database: str | Path, output_file: str | Path) -> None:
         titles_and_urls=titles_and_urls,
     )
 
+    output_path = Path(output_file)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     with Path(output_file).open("w") as f:
         f.write(html)
 
