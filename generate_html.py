@@ -4,7 +4,7 @@ import duckdb
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 
-TEMPLATES_PATH = "templates"
+TEMPLATES_PATH = Path(__file__).parent / "templates"
 INDEX_TEMPLATE = "index.html"
 
 
