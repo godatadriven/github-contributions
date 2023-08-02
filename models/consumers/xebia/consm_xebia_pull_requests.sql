@@ -7,3 +7,4 @@ WHERE author IN (
  {% endif %}
  {%endfor %}
 )
+ORDER BY state DESC, draft ASC, created_at DESC
