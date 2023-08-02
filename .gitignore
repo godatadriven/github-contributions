@@ -9,3 +9,6 @@ logs/
 
 # Duckdb
 *.duckdb
+
+# Site
+_site/build/
