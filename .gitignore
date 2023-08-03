@@ -12,3 +12,4 @@ logs/
 
 # Site
 _site/build/
+.idea

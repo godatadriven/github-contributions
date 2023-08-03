@@ -1,7 +1,7 @@
-SELECT
+select
     title,
     body,
-    user_login AS author,
+    user_login as author,
     author_association,
     owner_and_repository.full_repository_name,
     owner_and_repository.owner,
@@ -12,7 +12,7 @@ SELECT
     created_at,
     updated_at,
     closed_at,
-    pull_request_merged_at AS merged_at,
+    pull_request_merged_at as merged_at,
     reactions_total_count,
-    html_url AS url,
-FROM {{ ref('int_pull_requests') }}
+    html_url as url,
+from {{ ref("int_pull_requests") }}
