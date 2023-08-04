@@ -3,13 +3,13 @@ name: Deploy static content to Pages
 on:
   push:
     branches:
-    - main
+      - main
   workflow_dispatch:
   workflow_run:
     workflows:
-    - Run dbt
+      - Run dbt
     types:
-    - completed
+      - completed
 
 permissions:
   contents: read
@@ -32,36 +32,36 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Download duckdb
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        name: ${{ env.DUCKDB_PATH }}
-        workflow: dbt.yml
-        workflow_conclusion: success
+      - name: Download duckdb
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          workflow: dbt.yml
+          workflow_conclusion: success
 
-    - name: Install requirements
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install duckdb pandas Jinja2
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install duckdb pandas Jinja2
 
-    - name: Generate site
-      run: python _site/generate_html.py ${{ env.DUCKDB_PATH }} _site/build/index.html
+      - name: Generate site
+        run: python _site/generate_html.py ${{ env.DUCKDB_PATH }} _site/build/index.html
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
 
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: "_site/build/"
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: "_site/build/"
 
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v2
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

@@ -1,7 +1,7 @@
-SELECT
+select
     full_name,
     description,
-    owner_login AS owner,
+    owner_login as owner,
     name,
     owner_type,
     fork,
@@ -17,4 +17,4 @@ SELECT
     network_count,
     subscribers_count,
     language,
-FROM {{ ref('stg_repositories') }}
+from {{ ref("stg_repositories") }}

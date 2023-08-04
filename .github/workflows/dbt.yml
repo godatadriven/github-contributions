@@ -3,7 +3,7 @@ name: "Run dbt"
 on:
   workflow_dispatch:
   schedule:
-   - cron: '0 12 * * 4'  # Every Thursday at noon
+    - cron: "0 12 * * 4" # Every Thursday at noon
 
 env:
   DBT_PROFILES_DIR: .
@@ -14,37 +14,37 @@ jobs:
   dbt:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install requirements
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install dbt-duckdb github_contributions/
-        dbt deps
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install dbt-duckdb github_contributions/
+          dbt deps
 
-    - name: dbt build
-      run: dbt build
+      - name: dbt build
+        run: dbt build
 
-    - name: Delete duckdb database
-      run: |
-        if [ -e "${{ env.DUCKDB_PATH }}" ]; then
-          rm "${{ env.DUCKDB_PATH }}"
-        fi
-      if: ${{ failure() }}
+      - name: Delete duckdb database
+        run: |
+          if [ -e "${{ env.DUCKDB_PATH }}" ]; then
+            rm "${{ env.DUCKDB_PATH }}"
+          fi
+        if: ${{ failure() }}
 
-    - name: Upload duckdb
-      uses: actions/upload-artifact@v2
-      with:
-        name: github_contributions.duckdb
-        path: ${{ env.DUCKDB_PATH }}
+      - name: Upload duckdb
+        uses: actions/upload-artifact@v2
+        with:
+          name: github_contributions.duckdb
+          path: ${{ env.DUCKDB_PATH }}
 
-        # CHANGE WITH CAUSION!!!
-        # The retention days determines how long it takes for author data to be
-        # forgotten
-        retention-days: 15
-      if: ${{ success() }}
+          # CHANGE WITH CAUSION!!!
+          # The retention days determines how long it takes for author data to be
+          # forgotten
+          retention-days: 15
+        if: ${{ success() }}

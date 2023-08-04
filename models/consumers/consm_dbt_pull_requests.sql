@@ -1,4 +1,4 @@
-SELECT *
-FROM {{ ref('fct_pull_requests') }}
-WHERE 'dbt-labs' = owner OR contains(repository, 'dbt') OR suffix(repository, '-utils')
-ORDER BY state DESC, draft ASC, closed_at DESC
+select *
+from {{ ref("fct_pull_requests") }}
+where 'dbt-labs' = owner or contains(repository, 'dbt') or suffix(repository, '-utils')
+order by state desc, draft asc, closed_at desc

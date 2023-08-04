@@ -1,12 +1,12 @@
 github:
   target: default
   outputs:
-   default:
-     type: duckdb
-     path: "{{ env_var('DUCKDB_PATH') }}"
-     plugins:
-     - module: github_contributions.plugin
-       alias: github_contributions
-       config:
-         info: true
-         cache: true
+    default:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH') }}"
+      plugins:
+        - module: github_contributions.plugin
+          alias: github_contributions
+          config:
+            info: true
+            cache: true
