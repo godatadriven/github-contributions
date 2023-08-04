@@ -29,15 +29,17 @@ models:
 vars:
   author_string: "{% for author in var('authors') %}{{author.name}},{% endfor %}"
   authors:
-  - name: JCZuurmond
-    organization: Xebia
-  - name: jwills
-    organization: NA
-  - name: ManousogiannisM
-    organization: Xebia
-  - name: timotk
-    organization: Xebia
-  - name: ramonvermeulen
-    organization: Xebia
-  - name: RicardoAGL
-    organization: Xebia
+    - name: JCZuurmond
+      organization: Xebia
+    - name: jwills
+      organization: NA
+    - name: ManousogiannisM
+      organization: Xebia
+    - name: timotk
+      organization: Xebia
+    - name: ramonvermeulen
+      organization: Xebia
+    - name: RicardoAGL
+      organization: Xebia
+    - name: pgoslatara
+      organization: Xebia
