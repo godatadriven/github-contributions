@@ -1,16 +1,16 @@
 version: 2
 
 sources:
-- name: github_contributions
-  schema: main
-  meta:
-    plugin: github_contributions
-    authors: "{{ var('authors') }}"
-  tables:
-  - name: src_pull_requests
+  - name: github_contributions
+    schema: main
     meta:
-      resource: pull_requests
-  - name: src_repositories
-    meta:
-      resource: repositories
-      get_repositories_from_pull_requests: true
+      plugin: github_contributions
+      authors: "{{ var('authors') }}"
+    tables:
+      - name: src_pull_requests
+        meta:
+          resource: pull_requests
+      - name: src_repositories
+        meta:
+          resource: repositories
+          get_repositories_from_pull_requests: true

@@ -1,15 +1,16 @@
-# Github contributions 
+# Github contributions
 
 Keep track of your Github contributions!
 
 ## Contributions
 
 The following **public** Github contributions are tracked:
+
 1. Pull requests to repositories
 
 ### Data access
 
-The contributions are made **publicly** available. 
+The contributions are made **publicly** available.
 
 ### Data freshness
 
@@ -24,6 +25,7 @@ Contributions are only tracked when a Github user opted-in. Git and Github is
 used for auditing.
 
 A Github user is added through a pull request. The Github user:
+
 - Supplies the Github handle and organization her- or himself through a PR
 - OR approves the pull request that adds its Github handle and organization.
 
@@ -36,6 +38,7 @@ Github users can decide to stop tracking their contributions at any time. Git
 and Github is used for auditing.
 
 A Github user is removed through a pull request. The Github user:
+
 - Removes the Github handle and organization her- or himself through a PR
 - OR approves the pull request that removes its Github handle and organization.
 

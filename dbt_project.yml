@@ -7,8 +7,8 @@ profile: "github"
 model-paths: ["models"]
 
 clean-targets:
-- "target"
-- "dbt_packages"
+  - "target"
+  - "dbt_packages"
 
 models:
   github:
