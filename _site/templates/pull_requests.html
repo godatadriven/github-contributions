@@ -13,50 +13,52 @@
     />
   </head>
   <body>
-    <h1>Xebia Github Contributions</h1>
     <div class="content">
-      <h3>Pull Requests</h3>
-      <table id="table" class="display" style="width: 100%">
-        <thead>
-          <tr>
-            <th>Author</th>
-            <th>Owner</th>
-            <th>Repository</th>
-            <th>Title</th>
-            <th>State</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th>Closed</th>
-            <th>Merged</th>
-            <th>Total reaction count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {%- for pr in pull_requests -%}
-          <tr>
-            <td>{{ pr.author }}</td>
-            <td>{{ pr.owner }}</td>
-            <td>{{ pr.repository }}</td>
-            <td><a href="{{ pr.url }}" target="_blank">{{ pr.title }}</a></td>
-            <td>{{ pr.state }}</td>
-            <td>{{ pr.created_at }}</td>
-            <td>{{ pr.updated_at }}</td>
-            <td>{{ pr.closed_at }}</td>
-            <td>{{ pr.merged_at }}</td>
-            <td>{{ pr.reactions_total_count }}</td>
-          </tr>
-          {%- endfor -%}
-        </tbody>
-      </table>
-
-      <button type="button" class="collapsible">Unique Contributors</button>
-      <div class="collapsible-content">
-        <h3>Unique Contributors</h3>
-        <ul>
-          {%- for author in authors -%}
-          <li>{{ author }}</li>
-          {%- endfor -%}
-        </ul>
+      <h1>Xebia Github Contributions</h1>
+      <div class="card">
+        <h3>Pull Requests</h3>
+        <table id="table" class="display" style="width: 100%">
+          <thead>
+            <tr>
+              <th>Author</th>
+              <th>Owner</th>
+              <th>Repository</th>
+              <th>Title</th>
+              <th>State</th>
+              <th>Created</th>
+              <th>Updated</th>
+              <th>Closed</th>
+              <th>Merged</th>
+              <th>Total reaction count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for pr in pull_requests -%}
+            <tr>
+              <td>{{ pr.author }}</td>
+              <td>{{ pr.owner }}</td>
+              <td>{{ pr.repository }}</td>
+              <td><a href="{{ pr.url }}" target="_blank">{{ pr.title }}</a></td>
+              <td>{{ pr.state }}</td>
+              <td>{{ pr.created_at }}</td>
+              <td>{{ pr.updated_at }}</td>
+              <td>{{ pr.closed_at }}</td>
+              <td>{{ pr.merged_at }}</td>
+              <td>{{ pr.reactions_total_count }}</td>
+            </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <button type="button" class="collapsible">Unique Contributors</button>
+        <div class="collapsible-content">
+          <ul>
+            {%- for author in authors -%}
+            <li>{{ author }}</li>
+            {%- endfor -%}
+          </ul>
+        </div>
       </div>
     </div>
   </body>
