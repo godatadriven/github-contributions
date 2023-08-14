@@ -1,7 +1,33 @@
+@font-face {
+  font-family: Proxima;
+  src: url('./assets/fonts/proximanova-regular-webfont.woff2')
+          format('woff2'),
+      url('./assets/fonts/proximanova-regular-webfont.woff')
+          format('woff');
+}
+
+@font-face {
+  font-family: Proxima;
+  font-weight: 500;
+  src: url('./assets/fonts/proximanova-semibold-webfont.woff2')
+          format('woff2'),
+      url('./assets/fonts/proximanova-semibold-webfont.woff')
+          format('woff');
+}
+
+@font-face {
+  font-family: Proxima;
+  font-weight: 700;
+  src: url('./assets/fonts/proximanova-bold-webfont.woff2')
+          format('woff2'),
+      url('./assets/fonts/proximanova-bold-webfont.woff')
+          format('woff');
+}
+
 html {
   background-color: #FFFFFF;
   color: #6c1d5f;
-  font-family: "Helvetica Neue", HelveticaNeue, Arial, Helvetica, sans-serif;
+  font-family: 'Proxima', sans-serif;
 }
 
 .content {
@@ -16,9 +42,11 @@ html {
 h1 {
   text-align: center;
 }
+
 a {
   color: #4A1E47;
 }
+
 .collapsible {
   font-weight: bold;
   margin-top: 30px;
@@ -32,6 +60,7 @@ a {
   outline: none;
   font-size: 18px;
 }
+
 .active, .collapsible:hover {
   background-color: #9D92B2;
 }
@@ -40,8 +69,17 @@ a {
   padding: 0 18px;
   overflow: hidden;
   background-color: #D3CCEC;
+  color: #000000;
   max-height: 0;
   transition: max-height 0.2s ease-out;
+}
+
+th {
+  color: #4A1E47;
+}
+
+tr {
+  color: #000000;
 }
 
 
