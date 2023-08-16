@@ -11,5 +11,5 @@ logs/
 *.duckdb
 
 # Site
-_site/build/
+_site/index.html
 .idea
