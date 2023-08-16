@@ -52,7 +52,7 @@ jobs:
           python -m pip install duckdb pandas Jinja2
 
       - name: Generate site
-        run: python _site/generate_html.py ${{ env.DUCKDB_PATH }} _site/build/index.html
+        run: python _site/generate_html.py ${{ env.DUCKDB_PATH }} _site/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
@@ -60,7 +60,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: "_site/build/"
+          path: "_site/"
 
       - name: Deploy to GitHub Pages
         id: deployment
