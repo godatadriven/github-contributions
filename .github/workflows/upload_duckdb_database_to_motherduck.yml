@@ -1,0 +1,39 @@
+name: Upload duckdb database to Motherduck
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Run dbt
+    types:
+      - completed
+
+env:
+  DUCKDB_DATABASE: github_contributions
+  DUCKDB_PATH: github_contributions.duckdb
+  DUCKDB_VERSION: v0.8.1
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download duckdb
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          workflow: dbt.yml
+          workflow_conclusion: success
+
+      - name: Install duckdb
+        run: |
+          wget https://github.com/duckdb/duckdb/releases/download/${{ env.DUCKDB_VERSION }}/duckdb_cli-linux-amd64.zip
+          unzip -d . duckdb_cli-linux-amd64.zip
+
+      - name: Upload duckdb database to Motherduck
+        run: |
+          ./duckdb -c ".open md:" -s "DROP DATABASE IF EXISTS ${{ env.DUCKDB_DATABASE }}"
+          ./duckdb -c ".open md:" -s "CREATE DATABASE ${{ env.DUCKDB_DATABASE }} FROM '${{ env.DUCKDB_PATH }}'"
+        env:
+          motherduck_token: ${{ secrets.MOTHERDUCK_TOKEN }}
