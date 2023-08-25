@@ -52,6 +52,9 @@ jobs:
       - name: Static HTML export with Next.js
         run: npx --no-install next export
 
+      - name: Add .nojeckyll file to enforce styling
+        run: touch ./${{ env.WORKING_DIRECTORY }}out/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
