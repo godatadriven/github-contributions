@@ -21,6 +21,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  DUCKDB_PATH: github_contributions.duckdb
+  PYTHON_VERSION: 3.9
   WORKING_DIRECTORY: ./dashboard
 
 jobs:
@@ -32,6 +34,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      # TODO: Remove the steps until overwrite constants
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Download duckdb
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          workflow: dbt.yml
+          workflow_conclusion: success
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install duckdb pandas Jinja2
+
+      - name: Overwrite constants
+        run: python generate_constants.py ${{ env.DUCKDB_PATH }} src/constants.tsx
 
       - name: Setup Node
         uses: actions/setup-node@v3
