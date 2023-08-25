@@ -2,8 +2,8 @@
 * @type {import('next').NextConfig}
 */
 const nextConfig = {
-  basePath: '/repository',
-  assetPrefix: '/repository/'
+  basePath: '/github-contributions',
+  assetPrefix: '/github-contributions/'
 };
 
 module.exports = nextConfig
