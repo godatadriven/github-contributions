@@ -5,7 +5,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import * as React from "react";
 
-export const mainListItems = (
+export const drawerItems = (
   <React.Fragment>
     <ListItemButton>
       <ListItemIcon>

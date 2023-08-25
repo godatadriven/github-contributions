@@ -17,7 +17,7 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import * as React from "react";
 import KPI from "./KPI";
-import { mainListItems } from "./listItems";
+import { drawerItems } from "./drawerItems";
 
 const drawerWidth: number = 240;
 
@@ -126,7 +126,7 @@ export default function Dashboard() {
           </IconButton>
         </Toolbar>
         <Divider />
-        <List component="nav">{mainListItems}</List>
+        <List component="nav">{drawerItems}</List>
       </Drawer>
       <Box
         component="main"
