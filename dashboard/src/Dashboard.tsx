@@ -17,8 +17,8 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import * as React from "react";
 import KPI from "./KPI";
+import KPIs from "./constants";
 import { drawerItems } from "./drawerItems";
-
 const drawerWidth: number = 240;
 
 interface AppBarProps extends MuiAppBarProps {
@@ -153,7 +153,11 @@ export default function Dashboard() {
                   height: 240,
                 }}
               >
-                <KPI title="Contributors" kpiValue="26" subTitle="" />
+                <KPI
+                  title="Contributors"
+                  kpiValue={KPIs.contributors}
+                  subTitle=""
+                />
               </Paper>
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
@@ -165,7 +169,11 @@ export default function Dashboard() {
                   height: 240,
                 }}
               >
-                <KPI title="Pull Requests" kpiValue="218" subTitle="" />
+                <KPI
+                  title="Pull Requests"
+                  kpiValue={KPIs.pullrequests}
+                  subTitle=""
+                />
               </Paper>
             </Grid>
             <Grid item xs={12} md={4} lg={3}>
@@ -177,7 +185,7 @@ export default function Dashboard() {
                   height: 240,
                 }}
               >
-                <KPI title="Projects" kpiValue="87" subTitle="" />
+                <KPI title="Projects" kpiValue={KPIs.projects} subTitle="" />
               </Paper>
             </Grid>
           </Grid>

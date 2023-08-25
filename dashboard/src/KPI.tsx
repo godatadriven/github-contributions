@@ -2,13 +2,9 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import Title from "./Title";
 
-function preventDefault(event: React.MouseEvent) {
-  event.preventDefault();
-}
-
 interface KPIProps {
   title: string;
-  kpiValue: string;
+  kpiValue: number;
   subTitle: string;
 }
 
