@@ -53,7 +53,7 @@ jobs:
         run: npx --no-install next export
 
       - name: Add .nojeckyll file to enforce styling
-        run: touch ./${{ env.WORKING_DIRECTORY }}/out/.nojekyll
+        run: touch ${{ env.WORKING_DIRECTORY }}/out/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
