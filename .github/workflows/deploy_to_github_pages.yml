@@ -54,14 +54,7 @@ jobs:
       - name: Generate site
         run: python _site/generate_html.py ${{ env.DUCKDB_PATH }} _site/index.html
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: "_site/"
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2

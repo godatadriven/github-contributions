@@ -13,3 +13,42 @@ logs/
 # Site
 _site/index.html
 .idea
+
+### Next.js
+
+# dependencies
+/dashboard/node_modules
+/dashboard/.pnp
+.pnp.js
+
+# testing
+/dashboard/coverage
+
+# next.js
+/dashboard/.next/
+/dashboard/out/
+
+# production
+/dashboard/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
