@@ -1,9 +1,6 @@
-/**
-* @type {import('next').NextConfig}
-*/
-const nextConfig = {
+/** @type {import('next').NextConfig} */
+module.exports = {
+  reactStrictMode: true,
   basePath: '/github-contributions',
   assetPrefix: '/github-contributions/'
 };
-
-module.exports = nextConfig
