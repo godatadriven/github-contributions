@@ -7,9 +7,6 @@ import duckdb
 from jinja2 import Environment, FileSystemLoader
 
 
-PULL_REQUESTS_TEMPLATE = "pull_requests_template.html"
-
-
 def generate_html(duckdb_database: str | Path, output_file: str | Path) -> None:
     """Generate the HTML page that summarizes Xebia's Github contributions.
 
@@ -27,8 +24,8 @@ def generate_html(duckdb_database: str | Path, output_file: str | Path) -> None:
 
     unique_authors = pull_requests["author"].unique().tolist()
 
-    env = Environment(loader=FileSystemLoader("pull_requests/"))
-    template = env.get_template(PULL_REQUESTS_TEMPLATE)
+    env = Environment(loader=FileSystemLoader(Path(__file__).parent.as_posix()))
+    template = env.get_template("pull_requests_template.html")
     html = template.render(
         authors=unique_authors, pull_requests=pull_requests.to_records()
     )
