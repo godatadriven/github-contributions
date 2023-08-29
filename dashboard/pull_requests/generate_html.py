@@ -27,7 +27,7 @@ def generate_html(duckdb_database: str | Path, output_file: str | Path) -> None:
 
     unique_authors = pull_requests["author"].unique().tolist()
 
-    env = Environment(loader=FileSystemLoader("./"))
+    env = Environment(loader=FileSystemLoader("pull_requests/"))
     template = env.get_template(PULL_REQUESTS_TEMPLATE)
     html = template.render(
         authors=unique_authors, pull_requests=pull_requests.to_records()
