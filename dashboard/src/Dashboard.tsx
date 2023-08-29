@@ -16,9 +16,9 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import * as React from "react";
+import DrawerItems from "./DrawerItems";
 import KPI from "./KPI";
 import KPIs from "./constants";
-import { drawerItems } from "./drawerItems";
 const drawerWidth: number = 240;
 
 interface AppBarProps extends MuiAppBarProps {
@@ -126,7 +126,9 @@ export default function Dashboard() {
           </IconButton>
         </Toolbar>
         <Divider />
-        <List component="nav">{drawerItems}</List>
+        <List component="nav">
+          <DrawerItems />
+        </List>
       </Drawer>
       <Box
         component="main"
