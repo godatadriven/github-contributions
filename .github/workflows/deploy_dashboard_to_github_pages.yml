@@ -55,10 +55,10 @@ jobs:
           python -m pip install duckdb pandas Jinja2
 
       - name: Generate pull requests page
-        run: python pull_requests/generate_html.py ${{ env.DUCKDB_PATH }} public/pull_requests.html
+        run: python generate/generate_html.py ${{ env.DUCKDB_PATH }} public/pull_requests.html
 
       - name: Overwrite constants
-        run: python generate_constants.py ${{ env.DUCKDB_PATH }} src/constants.tsx
+        run: python generate/generate_constants.py ${{ env.DUCKDB_PATH }} src/constants.tsx
 
       - name: Setup Node
         uses: actions/setup-node@v3
