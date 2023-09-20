@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "duckdb-wasm-kit": "^0.1.16"
+  }
+}

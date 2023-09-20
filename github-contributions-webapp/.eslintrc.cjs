@@ -23,12 +23,13 @@ module.exports = {
     ],
     'sort-imports': ['error', {
       'ignoreCase': false,
-      'ignoreDeclarationSort': false,
+      'ignoreDeclarationSort': true,
       'ignoreMemberSort': false,
       'memberSyntaxSortOrder': ['none', 'all', 'multiple', 'single'],
-      'allowSeparatedGroups': false
+      'allowSeparatedGroups': true
     }],
     'quotes': ['error', 'single'],
-    'semi': ['error', 'always']
+    'semi': ['error', 'always'],
+    'object-curly-spacing': ['error', 'always']
   },
 }
