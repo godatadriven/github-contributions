@@ -9,7 +9,7 @@ const config: DuckDBConfig = {
     query: {
         castBigIntToDouble: true,
     },
-    path: '../src/assets/github_contributions.duckdb',
+    path: './assets/github_contributions.duckdb',
     accessMode: DuckDBAccessMode.AUTOMATIC,
 };
 
