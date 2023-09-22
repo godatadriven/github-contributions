@@ -1,5 +1,5 @@
 data_source github_contributions:
   type: duckdb
-  path: github_contributions.duckdb
-  schema: main
+  path: $(DUCKDB_PATH)
+  schema: $(SCHEMA)
   read_only: true

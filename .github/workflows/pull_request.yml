@@ -2,9 +2,6 @@ name: Scan for data quality
 
 on: pull_request
 
-env:
-  DUCKDB_PATH: github_contributions.duckdb
-
 jobs:
   soda_scan:
     runs-on: ubuntu-latest
@@ -19,6 +16,7 @@ jobs:
           SODA_CLOUD_API_KEY: ${{ secrets.SODA_CLOUD_API_KEY }}
           SODA_CLOUD_API_SECRET: ${{ secrets.SODA_CLOUD_API_SECRET }}
           SCHEMA: main
+          DUCKDB_PATH: github_contributions.duckdb
         with:
           soda_library_version: latest
           data_source: github_contributions
