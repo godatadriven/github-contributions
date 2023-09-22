@@ -4,6 +4,8 @@ github:
     default:
       type: duckdb
       path: "{{ env_var('DUCKDB_PATH') }}"
+      settings:
+        pandas_analyze_sample: 100000
       plugins:
         - module: github_contributions.plugin
           alias: github_contributions
