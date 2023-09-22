@@ -2,6 +2,9 @@ name: Scan for data quality
 
 on: pull_request
 
+env:
+  DUCKDB_PATH: github_contributions.duckdb
+
 jobs:
   soda_scan:
     runs-on: ubuntu-latest
@@ -10,13 +13,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Download duckdb
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          workflow: dbt.yml
+          workflow_conclusion: success
+
       - name: Perform Soda Scan
         uses: sodadata/soda-github-action@v1.0.2
         env:
           SODA_CLOUD_API_KEY: ${{ secrets.SODA_CLOUD_API_KEY }}
           SODA_CLOUD_API_SECRET: ${{ secrets.SODA_CLOUD_API_SECRET }}
           SCHEMA: main
-          DUCKDB_PATH: github_contributions.duckdb
         with:
           soda_library_version: v1.1.12
           data_source: github_contributions
