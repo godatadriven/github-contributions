@@ -1,0 +1,26 @@
+name: Scan for data quality
+
+on: pull_request
+
+env:
+  DUCKDB_PATH: github_contributions.duckdb
+
+jobs:
+  soda_scan:
+    runs-on: ubuntu-latest
+    name: Run Soda Scan
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Perform Soda Scan
+        uses: sodadata/soda-github-action@v1
+        env:
+          SODA_CLOUD_API_KEY: ${{ secrets.SODA_CLOUD_API_KEY }}
+          SODA_CLOUD_API_SECRET: ${{ secrets.SODA_CLOUD_API_SECRET }}
+          SCHEMA: main
+        with:
+          soda_library_version: latest
+          data_source: github_contributions
+          configuration: ./soda_configuration.yml
+          checks: ./soda_checks.yml
