@@ -1,4 +1,4 @@
-name: Scan for data quality
+name: Pull request checks
 
 on: pull_request
 
