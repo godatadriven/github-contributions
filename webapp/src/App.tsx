@@ -1,6 +1,6 @@
 import Router from './router/Router.tsx';
 
-import { CssBaseline, PaletteMode, ThemeProvider, createTheme } from '@mui/material';
+import {CssBaseline, PaletteMode, ThemeProvider, createTheme, Container} from '@mui/material';
 import { DuckDBAccessMode, DuckDBConfig } from '@duckdb/duckdb-wasm';
 import { useEffect, useState } from 'react';
 import { initializeDuckDb } from '../duckdb-wasm-kit/index';
@@ -59,7 +59,9 @@ function App() {
                     onClose: () => setDrawerOpen(false)
                 }}
             />
-            {loading ? <GlobalSpinner /> : <Router />}
+            <Container fixed maxWidth="xl">
+                {loading ? <GlobalSpinner /> : <Router />}
+            </Container>
         </ThemeProvider>
     );
 }

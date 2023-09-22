@@ -1,7 +1,6 @@
-import {PullRequest} from '../../types/PullRequest.ts';
-import {useDuckDbQuery} from '../../../duckdb-wasm-kit/index';
-import {Container} from '@mui/material';
-import {DataGrid, GridToolbar} from '@mui/x-data-grid';
+import { PullRequest } from '../../types/PullRequest.ts';
+import { useDuckDbQuery } from '../../../duckdb-wasm-kit/index';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import GlobalSpinner from '../../components/GlobalSpinner.tsx';
 
 
@@ -26,21 +25,19 @@ function PullRequests() {
             field: key,
             headerName: key.toUpperCase()
         }));
-        console.log(columns);
+
         return (
-            <Container fixed maxWidth="xl">
-                <DataGrid
-                    slots={{toolbar: GridToolbar}}
-                    columns={columns}
-                    rows={records.map((record, index) => ({...record, id: index}))}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {page: 0, pageSize: 15},
-                        },
-                    }}
-                    pageSizeOptions={[15, 20, 50, 100]}
-                />
-            </Container>
+            <DataGrid
+                slots={{ toolbar: GridToolbar }}
+                columns={columns}
+                rows={records.map((record, index) => ({ ...record, id: index }))}
+                initialState={{
+                    pagination: {
+                        paginationModel: { page: 0, pageSize: 15 },
+                    },
+                }}
+                pageSizeOptions={[15, 20, 50, 100]}
+            />
         );
     }
 
