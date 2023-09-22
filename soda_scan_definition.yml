@@ -1,0 +1,5 @@
+for each dataset T:
+  datasets:
+    - "%"
+  checks:
+    - row_count > 0
