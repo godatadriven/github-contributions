@@ -25,6 +25,7 @@ jobs:
         env:
           SODA_CLOUD_API_KEY: ${{ secrets.SODA_CLOUD_API_KEY }}
           SODA_CLOUD_API_SECRET: ${{ secrets.SODA_CLOUD_API_SECRET }}
+          DUCKDB_PATH: /tmp/workspace/${{ env.DUCKDB_PATH }}
           SCHEMA: main
         with:
           soda_library_version: v1.1.12
