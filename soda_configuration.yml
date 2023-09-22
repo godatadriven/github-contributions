@@ -3,3 +3,8 @@ data_source github_contributions:
   path: ${DUCKDB_PATH}
   schema: ${SCHEMA}
   read_only: true
+
+soda_cloud:
+  host: cloud.soda.io
+  api_key_id: ${SODA_CLOUD_API_KEY}
+  api_key_secret: ${SODA_CLOUD_API_SECRET}
