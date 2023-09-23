@@ -1,7 +1,0 @@
-const KPIs: Record<string, number> = {
-  pullrequests: {{ unique_pull_requests }},
-  contributors: {{ unique_authors }},
-  projects: {{ unique_projects }},
-};
-
-export default KPIs;
