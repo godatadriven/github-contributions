@@ -1,9 +1,9 @@
 import Router from './router/Router.tsx';
 
-import {CssBaseline, PaletteMode, ThemeProvider, createTheme, Container} from '@mui/material';
+import { Container, CssBaseline, PaletteMode, ThemeProvider, createTheme } from '@mui/material';
 import { DuckDBAccessMode, DuckDBConfig } from '@duckdb/duckdb-wasm';
 import { useEffect, useState } from 'react';
-import { initializeDuckDb } from '../duckdb-wasm-kit/index';
+import { initializeDuckDb } from 'duckdb-wasm-kit';
 
 import GlobalAppBar from './components/GlobalAppBar.tsx';
 import GlobalAppDrawer from './components/GlobalAppDrawer.tsx';

@@ -1,8 +1,8 @@
-import { PullRequest } from '../../types/PullRequest.ts';
-import { useDuckDbQuery } from '../../../duckdb-wasm-kit/index';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import GlobalSpinner from '../../components/GlobalSpinner.tsx';
+import { PullRequest } from '../../types/PullRequest.ts';
+import { useDuckDbQuery } from 'duckdb-wasm-kit';
 
+import GlobalSpinner from '../../components/GlobalSpinner.tsx';
 
 function PullRequests() {
     const {

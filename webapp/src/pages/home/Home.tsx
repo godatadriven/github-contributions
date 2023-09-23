@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material';
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
-import { useDuckDbQuery } from '../../../duckdb-wasm-kit/index';
+import { useDuckDbQuery } from 'duckdb-wasm-kit';
 
 function Home() {
     const {
