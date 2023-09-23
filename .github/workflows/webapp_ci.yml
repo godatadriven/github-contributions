@@ -1,4 +1,4 @@
-name: Pull request Web-app CI
+name: Web-app CI
 
 on:
   pull_request:
@@ -27,5 +27,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with Vite
+      - name: Run ESLint
         run: npm run lint
