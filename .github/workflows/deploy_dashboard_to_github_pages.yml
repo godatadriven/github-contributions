@@ -22,7 +22,6 @@ concurrency:
 
 env:
   DUCKDB_PATH: github_contributions.duckdb
-  PYTHON_VERSION: 3.9
   WORKING_DIRECTORY: ./webapp
 
 jobs:
