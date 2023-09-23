@@ -23,7 +23,7 @@ concurrency:
 env:
   DUCKDB_PATH: github_contributions.duckdb
   PYTHON_VERSION: 3.9
-  WORKING_DIRECTORY: ./dashboard
+  WORKING_DIRECTORY: ./webapp
 
 jobs:
   build:
@@ -35,30 +35,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # TODO: Remove the steps until overwrite constants
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Download duckdb
         uses: dawidd6/action-download-artifact@v2
         with:
           name: ${{ env.DUCKDB_PATH }}
           workflow: dbt.yml
           workflow_conclusion: success
-          path: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Install requirements
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install duckdb pandas Jinja2
-
-      - name: Generate pull requests page
-        run: python generate/generate_html.py ${{ env.DUCKDB_PATH }} public/pull_requests.html
-
-      - name: Overwrite constants
-        run: python generate/generate_constants.py ${{ env.DUCKDB_PATH }} src/constants.tsx
+          path: ${{ env.WORKING_DIRECTORY }}/public/
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -73,17 +56,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with Next.js
-        run: npx --no-install next build
-
-      - name: Static HTML export with Next.js
-        run: npx --no-install next export
+      - name: Build with Vite
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           name: github-pages
-          path: ./${{ env.WORKING_DIRECTORY }}/out
+          path: ./${{ env.WORKING_DIRECTORY }}/dist
 
   deploy:
     environment:
