@@ -16,3 +16,12 @@ export interface PullRequest {
     updated_at: string;
     url: string;
 }
+
+export interface Counter {
+    amount: number;
+}
+
+export interface OrderedCounter<T> {
+    orderedField: T;
+    amount: number;
+}

@@ -1,25 +1,26 @@
 import { Card, CardContent, Typography } from '@mui/material';
 import GlobalSpinner from '../components/GlobalSpinner.tsx';
+import { ReactNode } from 'react';
 
 interface PlaceHolderCardProps {
-    title: string;
-    value: string;
-    loading: boolean;
+    title?: string;
+    children?: ReactNode;
+    loading?: boolean;
 }
 const PlaceholderCard = ({
     title,
-    value,
+    children,
     loading
 }: PlaceHolderCardProps) => {
     return (
         <Card>
             <CardContent>
-                {loading? (
+                {loading ? (
                     <GlobalSpinner />
                 ) : (
                     <>
-                        <Typography variant="h6">{title}</Typography>
-                        <Typography variant="h4">{value}</Typography>
+                        {!!title && (<Typography variant="h6">{title}</Typography>)}
+                        {!!children && (<>{children}</>)}
                     </>
                 )}
             </CardContent>
