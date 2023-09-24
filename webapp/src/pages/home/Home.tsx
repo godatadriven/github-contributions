@@ -24,8 +24,8 @@ const chartOptions: ChartWrapperOptions['options'] = {
 };
 
 function Home() {
-    const [weeklyPullRequestChartData, setWeeklyPullRequestChartData] = useState<(string | number)[][]>([]);
-    const [monthlyPullRequestChartData, setMonthlyPullRequestChartData] = useState<(string | number)[][]>([]);
+    const [weeklyPullRequestChartData, setWeeklyPullRequestChartData] = useState<(string | number)[][]>();
+    const [monthlyPullRequestChartData, setMonthlyPullRequestChartData] = useState<(string | number)[][]>();
     const { data: pullRequestCount,  loading: loadingPullRequests } = useQuery<Counter>(
         'SELECT count(*) as amount FROM main_marts.fct_pull_requests;'
     );
