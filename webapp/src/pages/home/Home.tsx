@@ -2,7 +2,7 @@ import { Counter, OrderedCounter } from '../../types/global.ts';
 import { Grid, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Chart } from 'react-google-charts';
-import { ChartWrapperOptions } from 'react-google-charts/dist/types';
+import { ChartWrapperOptions } from 'react-google-charts';
 import { format } from 'date-fns';
 
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
@@ -24,8 +24,8 @@ const chartOptions: ChartWrapperOptions['options'] = {
 };
 
 function Home() {
-    const [weeklyPullRequestChartData, setWeeklyPullRequestChartData] = useState();
-    const [monthlyPullRequestChartData, setMonthlyPullRequestChartData] = useState();
+    const [weeklyPullRequestChartData, setWeeklyPullRequestChartData] = useState<(string | number)[][]>([]);
+    const [monthlyPullRequestChartData, setMonthlyPullRequestChartData] = useState<(string | number)[][]>([]);
     const { data: pullRequestCount,  loading: loadingPullRequests } = useQuery<Counter>(
         'SELECT count(*) as amount FROM main_marts.fct_pull_requests;'
     );
@@ -66,19 +66,18 @@ function Home() {
         `
     );
 
-    const prepareChartData = (data: OrderedCounter[] | undefined, columns: string[]) => {
-        if (!data) return data;
-        const chartData = [columns];
-        return chartData.concat(data?.map((item) => [
+    const prepareChartData = (data: OrderedCounter<Date>[], columns: (string | number)[][]) => {
+        const chartData = data.map((item) => [
             format(item.orderedField, 'dd-MM-yyyy'),
             item.amount
-        ]));
+        ]);
+        return columns.concat(chartData);
     };
 
     useEffect(() => {
         if (weeklyPullRequestCounts && monthlyPullRequestCounts && !weeklyPullRequestChartData && !monthlyPullRequestChartData) {
-            setWeeklyPullRequestChartData(prepareChartData(weeklyPullRequestCounts, ['Week', 'Amount']));
-            setMonthlyPullRequestChartData(prepareChartData(monthlyPullRequestCounts, ['Maand', 'Amount']));
+            setWeeklyPullRequestChartData(prepareChartData(weeklyPullRequestCounts, [['Week', 'Amount']]));
+            setMonthlyPullRequestChartData(prepareChartData(monthlyPullRequestCounts, [['Maand', 'Amount']]));
         }
     }, [weeklyPullRequestCounts, monthlyPullRequestCounts, weeklyPullRequestChartData, monthlyPullRequestChartData]);
 

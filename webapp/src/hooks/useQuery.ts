@@ -4,7 +4,7 @@ function useQuery<T>(query: string) {
     const { arrow, loading, error } = useDuckDbQuery(query);
 
     if (!loading && arrow) {
-        const data: T[] = arrow.toArray().map(record => record.toJSON());
+        const data: T[] = arrow.toArray().map((record: { toJSON: () => T; }) => record.toJSON());
         return { data, loading, error };
     }
 
