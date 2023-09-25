@@ -6,7 +6,7 @@
   "homepage": "https://godatadriven.github.io/github-contributions/",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --base=/github-contributions/",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "fix-lint": "eslint . --ext ts,tsx --fix",
     "preview": "vite preview"
