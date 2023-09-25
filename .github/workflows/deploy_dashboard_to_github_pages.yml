@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           name: github-pages
-          path: ./${{ env.WORKING_DIRECTORY }}/dist
+          path: ${{ env.WORKING_DIRECTORY }}/dist
 
   deploy:
     environment:
