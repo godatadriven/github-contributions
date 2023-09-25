@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "homepage": "https://godatadriven.github.io/github-contributions/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
