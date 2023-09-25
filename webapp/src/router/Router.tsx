@@ -1,9 +1,7 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createHashRouter } from 'react-router-dom';
 import routes from '../router/routes.tsx';
 
-const router = createBrowserRouter(routes, {
-    basename: '/github-contributions'
-});
+const router = createHashRouter(routes);
 
 function Router() {
     return <RouterProvider router={router}/>;
