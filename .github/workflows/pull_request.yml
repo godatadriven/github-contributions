@@ -1,7 +1,9 @@
 name: Pull request checks
 
-on: pull_request
-
+on:
+  pull_request:
+    paths-ignore:
+      - 'webapp/**'
 env:
   DUCKDB_PATH: github_contributions.duckdb
 

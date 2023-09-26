@@ -1,0 +1,45 @@
+{
+  "name": "github-contributions-webapp",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "homepage": "https://godatadriven.github.io/github-contributions/",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build --base=/github-contributions/",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "fix-lint": "eslint . --ext ts,tsx --fix",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-regular-svg-icons": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@holdenmatt/ts-utils": "^0.1.13",
+    "@mui/material": "^5.14.10",
+    "@mui/x-data-grid": "^6.14.0",
+    "date-fns": "^2.30.0",
+    "duckdb-wasm-kit": "^0.1.18",
+    "react": "^18.2.0",
+    "react-async-hook": "^4.0.0",
+    "react-dom": "^18.2.0",
+    "react-google-charts": "^4.0.1",
+    "react-router-dom": "^6.16.0"
+  },
+  "devDependencies": {
+    "@mui/icons-material": "^5.14.9",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  }
+}
