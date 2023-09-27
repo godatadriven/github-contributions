@@ -1,24 +1,29 @@
-import { Counter, OrderedCounter } from '../../types/global.ts';
+import { Counter, OrderedCounter, SelectBoxItem } from '../../types/global.ts';
 import { Grid, Typography, useTheme } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { ApexOptions } from 'apexcharts';
 import { format } from 'date-fns';
 
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
+import SelectBox from '../../components/SelectBox.tsx';
 import ReactApexChart from 'react-apexcharts';
 import useQuery from '../../hooks/useQuery.ts';
 
 
 function Home() {
     const [allDataLoaded, setAllDataLoaded] = useState(false);
+    const [authorFilter, setAuthorFilter] = useState('All');
+    const { data: contributors, loading: loadingContributors, error } = useQuery(
+        'SELECT distinct author FROM main_marts.fct_pull_requests;'
+    );
     const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(
-        'SELECT count(*) as amount FROM main_marts.fct_pull_requests;'
+        `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${authorFilter !== 'All' ? `WHERE author=\'${authorFilter}\'` : ''};`
     );
     const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(
-        'SELECT count(*) as amount FROM main_marts.fct_repositories;'
+        `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${authorFilter !== 'All' ? `WHERE author=\'${authorFilter}\'` : ''};`
     );
     const { data: contributorCount, loading: loadingConbributors } = useQuery<Counter>(
-        'SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests;'
+        `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests ${authorFilter !== 'All' ? `WHERE author=\'${authorFilter}\'` : ''};`
     );
     const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(
         `
@@ -26,6 +31,7 @@ function Home() {
                    COUNT(DISTINCT title)                        AS amount
             FROM main_marts.fct_pull_requests
             WHERE CAST(created_at AS DATE) >= date_add(CURRENT_DATE(), INTERVAL '-1 year')
+            ${authorFilter !== 'All' ? `AND author=\'${authorFilter}\'` : ''}
             GROUP BY DATE_TRUNC('week', CAST(created_at AS DATE))
             ORDER BY orderedField;
         `
@@ -36,6 +42,7 @@ function Home() {
                    COUNT(DISTINCT title)                         AS amount
             FROM main_marts.fct_pull_requests
             WHERE CAST(created_at AS DATE) >= DATE_TRUNC('month', CURRENT_DATE() - INTERVAL '1 year') + INTERVAL '1 month'
+            ${authorFilter !== 'All' ? `AND author=\'${authorFilter}\'` : ''}
             GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
             ORDER BY orderedField;
         `
@@ -47,12 +54,20 @@ function Home() {
                    COUNT(DISTINCT title) AS amount
             FROM main_marts.fct_pull_requests
             WHERE CAST(created_at AS DATE) >= date_add(CURRENT_DATE(), INTERVAL '-1 year')
+            ${authorFilter !== 'All' ? `AND author=\'${authorFilter}\'` : ''}
             GROUP BY repository
             ORDER BY amount DESC;
         `
     );
     const theme = useTheme();
-
+    const preparedContributors = useMemo<string[]>(() => {
+        if (contributors) {
+            const prepData = contributors.map(item => item.author);
+            prepData.push('All');
+            return prepData;
+        }
+        return ['All']
+    }, [contributors]);
     const chartOptions = useMemo<ApexOptions>(() => ({
         chart: {
             type: 'bar',
@@ -110,7 +125,8 @@ function Home() {
             contributorCount &&
             weeklyPullRequestCounts &&
             monthlyPullRequestCounts &&
-            pullRequestsPerRepository
+            pullRequestsPerRepository &&
+            contributors
         ) {
             setAllDataLoaded(true); // so the UI triggers only one rerender
         }
@@ -121,12 +137,24 @@ function Home() {
         weeklyPullRequestCounts,
         monthlyPullRequestCounts,
         pullRequestsPerRepository,
+        contributors,
     ]);
 
     return (
         <Grid container spacing={2}>
             {allDataLoaded && (
                 <>
+                    <Grid item xs={12} sm={12} md={6}>
+                        {!!contributors && (<SelectBox
+                            label="Author"
+                            items={preparedContributors}
+                            value={authorFilter}
+                            onSelect={setAuthorFilter}
+                        />)}
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6}>
+
+                    </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                         <PlaceholderCard title="Total PRs" loading={loadingPullRequests}>
                             {!!pullRequestCount && (<Typography variant="h4">{pullRequestCount[0].amount}</Typography>)}

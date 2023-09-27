@@ -60,8 +60,8 @@ function App() {
                 }}
                 onClickDrawerItem={() => setDrawerOpen(false)}
             />
-            <Container fixed maxWidth="xl">
-                {loading ? <GlobalSpinner /> : <Router />}
+            <Container fixed maxWidth="xl" style={{ marginTop: '50px', marginBottom: '50px' }}>
+                {loading ? <GlobalSpinner text="Fetching and initializing duckdb..."/> : <Router />}
             </Container>
         </ThemeProvider>
     );
