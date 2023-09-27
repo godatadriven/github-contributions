@@ -1,29 +1,31 @@
-import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { useState } from 'react';
 
 interface SelectBoxProps {
     items: string[];
-    value: string;
     label: string;
-    onSelect: (value: string) => void;
+    onChangeValue: (value: string) => void;
 }
 
 function SelectBox({
     items,
-    value,
     label,
-    onSelect,
+    onChangeValue,
 }: SelectBoxProps) {
-    function onChange(event: SelectChangeEvent) {
-        onSelect(event.target.value as string);
-    }
+    const [selected, setSelected] = useState('');
 
+    function onChange(event: SelectChangeEvent) {
+        setSelected(event.target.value as string);
+        onChangeValue(event.target.value as string);
+    }
+    
     return (
         <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">{label}</InputLabel>
             <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={value}
+                value={selected}
                 label={label}
                 onChange={onChange}
             >
