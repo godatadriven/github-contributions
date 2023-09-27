@@ -104,7 +104,7 @@ function Home() {
         }
     };
 
-    const chartOptions = useMemo<ApexOptions>(() => ({
+    const chartOptions: ApexOptions = {
         chart: {
             type: 'bar',
         },
@@ -152,7 +152,7 @@ function Home() {
                 }
             }
         },
-    }), [theme]);
+    };
 
     useEffect(() => {
         if (
