@@ -17,7 +17,7 @@ export default function GlobalAppDrawer(props: GlobalAppDrawerProps) {
                 <List>
                     {routes.map(route => (
                         <ListItem key={route.id} disablePadding>
-                            <ListItemButton href={'/github-contributions/#' + route.path} onClick={() => props.onClickDrawerItem()}>
+                            <ListItemButton href={'/github-contributions/#' + route.path} onClick={props.onClickDrawerItem}>
                                 <ListItemIcon>
                                     <FontAwesomeIcon icon={route.icon} />
                                 </ListItemIcon>
