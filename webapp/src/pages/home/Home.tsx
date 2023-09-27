@@ -30,7 +30,7 @@ function Home() {
             ORDER BY orderedField;
         `
     );
-    const { data: monthlyPullRequestCounts, loading: loadingMonthlyData} = useQuery<OrderedCounter<Date>>(
+    const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(
         `
             SELECT DATE_TRUNC('month', CAST(created_at AS DATE)) AS orderedField,
                    COUNT(DISTINCT title)                         AS amount
