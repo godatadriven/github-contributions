@@ -30,16 +30,17 @@ function Home() {
             ORDER BY orderedField;
         `
     );
-    const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(
+    const { data: monthlyPullRequestCounts, loading: loadingMonthlyData} = useQuery<OrderedCounter<Date>>(
         `
             SELECT DATE_TRUNC('month', CAST(created_at AS DATE)) AS orderedField,
                    COUNT(DISTINCT title)                         AS amount
             FROM main_marts.fct_pull_requests
-            WHERE CAST(created_at AS DATE) >= date_add(CURRENT_DATE(), INTERVAL '-1 year')
+            WHERE CAST(created_at AS DATE) >= DATE_TRUNC('month', CURRENT_DATE() - INTERVAL '1 year') + INTERVAL '1 month'
             GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
             ORDER BY orderedField;
         `
     );
+
     const { data: pullRequestsPerRepository, loading: loadingPerRepoData } = useQuery<OrderedCounter<string>>(
         `
             SELECT repository            AS            orderedField,
