@@ -7,21 +7,17 @@ import routes from '../router/routes.tsx';
 
 interface GlobalAppDrawerProps {
     drawerProps: DrawerProps;
+    onClickDrawerItem: () => void;
 }
 export default function GlobalAppDrawer(props: GlobalAppDrawerProps) {
 
     return (
-        <Drawer
-            {...props.drawerProps}
-        >
-            <Box
-                sx={{ width: 250 }}
-                role="presentation"
-            >
+        <Drawer {...props.drawerProps}>
+            <Box sx={{ width: 250 }} role="presentation">
                 <List>
                     {routes.map(route => (
                         <ListItem key={route.id} disablePadding>
-                            <ListItemButton href={'/github-contributions/#' + route.path}>
+                            <ListItemButton href={'/github-contributions/#' + route.path} onClick={() => props.onClickDrawerItem()}>
                                 <ListItemIcon>
                                     <FontAwesomeIcon icon={route.icon} />
                                 </ListItemIcon>

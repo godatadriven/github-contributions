@@ -37,7 +37,7 @@ function App() {
 
     useEffect(() => {
         const setupApplication = async () => {
-            await initializeDuckDb({ config: duckDbConfig, debug: true });
+            await initializeDuckDb({ config: duckDbConfig, debug: false });
             setLoading(false);
         };
 
@@ -58,6 +58,7 @@ function App() {
                     open: drawerOpen,
                     onClose: () => setDrawerOpen(false)
                 }}
+                onClickDrawerItem={() => setDrawerOpen(false)}
             />
             <Container fixed maxWidth="xl">
                 {loading ? <GlobalSpinner /> : <Router />}
