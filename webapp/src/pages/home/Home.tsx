@@ -143,7 +143,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <PlaceholderCard title="Pull requests per week (last year)" loading={loadingWeeklyData}>
+                        <PlaceholderCard title="Pull requests per week (past year)" loading={loadingWeeklyData}>
                             {!!weeklyPullRequestCounts && (
                                 <ReactApexChart
                                     options={{
@@ -166,7 +166,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <PlaceholderCard title="Pull requests per month (last year)" loading={loadingMonthlyData}>
+                        <PlaceholderCard title="Pull requests per month (past year)" loading={loadingMonthlyData}>
                             {!!monthlyPullRequestCounts && (
                                 <ReactApexChart
                                     options={{
@@ -187,7 +187,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
-                        <PlaceholderCard title="Contribution treemap (last year)" loading={loadingPerRepoData}>
+                        <PlaceholderCard title="Contribution treemap (past year)" loading={loadingPerRepoData}>
                             {!!pullRequestsPerRepository && (
                                 <ReactApexChart
                                     options={{
