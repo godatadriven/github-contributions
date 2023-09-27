@@ -66,7 +66,7 @@ function Home() {
     const preparedAuthors = useMemo<string[]>(() => {
         if (authors) {
             const prepData = authors.map(item => item.author);
-            prepData.push('All');
+            prepData.unshift('All');
             return prepData;
         }
         return ['All'];
@@ -74,7 +74,7 @@ function Home() {
     const preparedRepositories = useMemo<string[]>(() => {
         if (repositories) {
             const prepData = repositories.map(item => item.repository);
-            prepData.push('All');
+            prepData.unshift('All');
             return prepData;
         }
         return ['All'];
@@ -185,6 +185,7 @@ function Home() {
                     <Grid item xs={12} sm={12} md={6}>
                         {!!preparedAuthors && (<SelectBox
                             label="Author"
+                            initialSelection="All"
                             items={preparedAuthors}
                             onChangeValue={onChangeAuthorSelectBox}
                         />)}
@@ -192,6 +193,7 @@ function Home() {
                     <Grid item xs={12} sm={12} md={6}>
                         {!!repositories && (<SelectBox
                             label="Repository"
+                            initialSelection="All"
                             items={preparedRepositories}
                             onChangeValue={onChangeRepositorySelectBox}
                         />)}

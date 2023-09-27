@@ -4,15 +4,17 @@ import { useState } from 'react';
 interface SelectBoxProps {
     items: string[];
     label: string;
+    initialSelection: string;
     onChangeValue: (value: string) => void;
 }
 
 function SelectBox({
     items,
     label,
+    initialSelection,
     onChangeValue,
 }: SelectBoxProps) {
-    const [selected, setSelected] = useState('');
+    const [selected, setSelected] = useState(initialSelection);
 
     function onChange(event: SelectChangeEvent) {
         setSelected(event.target.value as string);
