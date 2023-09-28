@@ -1,138 +1,266 @@
 import { Counter, OrderedCounter } from '../../types/global.ts';
-import { Grid, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { Chart } from 'react-google-charts';
-import { ChartWrapperOptions } from 'react-google-charts';
+import { Grid, Typography, useTheme } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import useQueryFilter, { QueryFilter } from '../../hooks/useQueryFilter.ts';
+import { ApexOptions } from 'apexcharts';
 import { format } from 'date-fns';
 
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
+import ReactApexChart from 'react-apexcharts';
+import SelectBox from '../../components/SelectBox.tsx';
 import useQuery from '../../hooks/useQuery.ts';
 
 
-const chartOptions: ChartWrapperOptions['options'] = {
-    colors: ['#6C1D5F'],
-    hAxis: {
-        minValue: 0,
-    },
-    vAxis: {
-        title: 'Amount of Pull Requests',
-        minValue: 0,
-    },
-    legend: {
-        position: 'none'
-    }
-};
-
 function Home() {
-    const [weeklyPullRequestChartData, setWeeklyPullRequestChartData] = useState<(string | number)[][]>();
-    const [monthlyPullRequestChartData, setMonthlyPullRequestChartData] = useState<(string | number)[][]>();
-    const { data: pullRequestCount,  loading: loadingPullRequests } = useQuery<Counter>(
-        'SELECT count(*) as amount FROM main_marts.fct_pull_requests;'
-    );
-    const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(
-        'SELECT count(*) as amount FROM main_marts.fct_repositories;'
-    );
-    const { data: contributorCount, loading: loadingConbributors } = useQuery<Counter>(
-        'SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests;'
-    );
-    const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(
-        `
-            SELECT
-                DATE_TRUNC('week', CAST(created_at AS DATE)) AS orderedField,
-                COUNT(DISTINCT title) AS amount
-            FROM
-                main_marts.fct_pull_requests
-            WHERE
-                CAST(created_at AS DATE) >= date_add(CURRENT_DATE(), INTERVAL '-1 year')
-            GROUP BY
-                DATE_TRUNC('week', CAST(created_at AS DATE))
-            ORDER BY
-                orderedField;
-        `
-    );
-    const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(
-        `
-            SELECT
-                DATE_TRUNC('month', CAST(created_at AS DATE)) AS orderedField,
-                COUNT(DISTINCT title) AS amount
-            FROM
-                main_marts.fct_pull_requests
-            WHERE
-                CAST(created_at AS DATE) >= date_add(CURRENT_DATE(), INTERVAL '-1 year')
-            GROUP BY
-                DATE_TRUNC('month', CAST(created_at AS DATE))
-            ORDER BY
-                orderedField;
-        `
-    );
+    const theme = useTheme();
+    const [allDataLoaded, setAllDataLoaded] = useState(false);
+    const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
+    const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
+    const filters = [authorFilter, repositoryFilter];
 
-    const prepareChartData = (data: OrderedCounter<Date>[], columns: (string | number)[][]) => {
-        const chartData = data.map((item) => [
-            format(item.orderedField, 'dd-MM-yyyy'),
-            item.amount
-        ]);
-        return columns.concat(chartData);
+    const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests;';
+    const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests;';
+    const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
+    const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
+    const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
+    const weeklyPullRequestCountQuery = `
+        SELECT DATE_TRUNC('week', CAST(created_at AS DATE)) AS orderedField,
+               COUNT(DISTINCT title) AS amount
+        FROM main_marts.fct_pull_requests
+        ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
+        GROUP BY DATE_TRUNC('week', CAST(created_at AS DATE))
+        ORDER BY orderedField;
+    `;
+    const monthlyPullRequestCountQuery =         `
+        SELECT DATE_TRUNC('month', CAST(created_at AS DATE)) AS orderedField,
+               COUNT(DISTINCT title) AS amount
+        FROM main_marts.fct_pull_requests
+         ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'DATE_TRUNC(\'month\', CURRENT_DATE() - INTERVAL \'1 year\') + INTERVAL \'1 month\'' }])}
+        GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
+        ORDER BY orderedField;
+    `;
+    const pullRequestsPerRepoQuery = `
+        SELECT repository AS orderedField,
+               COUNT(DISTINCT title) AS amount
+        FROM main_marts.fct_pull_requests
+         ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
+        GROUP BY repository
+        ORDER BY amount DESC;
+    `;
+
+    const { data: authors } = useQuery<{ author: string }>(authorQuery);
+    const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
+    const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(pullRequestCountQuery);
+    const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(repoCountQuery);
+    const { data: contributorCount, loading: loadingContributors } = useQuery<Counter>(contributorCountQuery);
+    const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(weeklyPullRequestCountQuery);
+    const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(monthlyPullRequestCountQuery);
+    const { data: pullRequestsPerRepository, loading: loadingPerRepoData } = useQuery<OrderedCounter<string>>(pullRequestsPerRepoQuery);
+
+    const preparedAuthors = useMemo<string[]>(() => {
+        if (authors) {
+            const prepData = authors.map(item => item.author);
+            prepData.unshift('All');
+            return prepData;
+        }
+        return ['All'];
+    }, [authors]);
+
+    const preparedRepositories = useMemo<string[]>(() => {
+        if (repositories) {
+            const prepData = repositories.map(item => item.repository);
+            prepData.unshift('All');
+            return prepData;
+        }
+        return ['All'];
+    }, [repositories]);
+
+    const onChangeSelectBox = (value: string, filterSetter: (filter: QueryFilter | undefined) => void, column: string) => {
+        if (value === 'All') {
+            filterSetter(undefined);
+        } else {
+            filterSetter({
+                column,
+                operator: '=',
+                target: `'${value}'`,
+            });
+        }
+    };
+
+    const chartOptions: ApexOptions = {
+        chart: {
+            type: 'bar',
+        },
+        colors: [theme.palette.primary.main],
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                dataLabels: {
+                    position: 'top',
+                },
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            offsetY: -20,
+            style: {
+                fontSize: '10px',
+                colors: [theme.palette.text.primary]
+            }
+        },
+        xaxis: {
+            position: 'top',
+            axisTicks: {
+                show: false
+            },
+            tooltip: {
+                enabled: true,
+            },
+            labels: {
+                show: false
+            }
+        },
+        yaxis: {
+            axisBorder: {
+                show: true
+            },
+            axisTicks: {
+                show: true,
+                color: theme.palette.text.secondary,
+            },
+            labels: {
+                show: true,
+                style: {
+                    colors: [theme.palette.text.primary]
+                }
+            }
+        },
     };
 
     useEffect(() => {
-        if (weeklyPullRequestCounts && monthlyPullRequestCounts && !weeklyPullRequestChartData && !monthlyPullRequestChartData) {
-            setWeeklyPullRequestChartData(prepareChartData(weeklyPullRequestCounts, [['Week', 'Amount']]));
-            setMonthlyPullRequestChartData(prepareChartData(monthlyPullRequestCounts, [['Maand', 'Amount']]));
+        if (
+            pullRequestCount &&
+            repositoryCount &&
+            contributorCount &&
+            weeklyPullRequestCounts &&
+            monthlyPullRequestCounts &&
+            pullRequestsPerRepository &&
+            authors &&
+            repositories
+        ) {
+            setAllDataLoaded(true); // so the UI triggers only one rerender
         }
-    }, [weeklyPullRequestCounts, monthlyPullRequestCounts, weeklyPullRequestChartData, monthlyPullRequestChartData]);
-
+    }, [
+        pullRequestCount,
+        repositoryCount,
+        contributorCount,
+        weeklyPullRequestCounts,
+        monthlyPullRequestCounts,
+        pullRequestsPerRepository,
+        authors,
+        repositories
+    ]);
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
-                <PlaceholderCard title="Total PRs" loading={loadingPullRequests}>
-                    {!!pullRequestCount && (<Typography variant="h4">{pullRequestCount[0].amount}</Typography>)}
-                </PlaceholderCard>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-                <PlaceholderCard title="Total Repositories" loading={loadingRepositories}>
-                    {!!repositoryCount && (<Typography variant="h4">{repositoryCount[0].amount}</Typography>)}
-                </PlaceholderCard>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-                <PlaceholderCard title="Total Contributors" loading={loadingConbributors}>
-                    {!!contributorCount && (<Typography variant="h4">{contributorCount[0].amount}</Typography>)}
-                </PlaceholderCard>
-            </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <PlaceholderCard title="Pull requests per week (last year)" loading={loadingWeeklyData}>
-                    {!!weeklyPullRequestChartData && (<Chart
-                        chartType="ColumnChart"
-                        width="100%"
-                        height="400px"
-                        data={weeklyPullRequestChartData}
-                        options={{
-                            ...chartOptions,
-                            hAxis: {
-                                title: 'Week'
-                            }
-                        }}
-                    />)}
-                </PlaceholderCard>
-            </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <PlaceholderCard title="Pull requests per month (last year)" loading={loadingMonthlyData}>
-                    {!!monthlyPullRequestChartData && (<Chart
-                        chartType="ColumnChart"
-                        width="100%"
-                        height="400px"
-                        data={monthlyPullRequestChartData}
-                        options={{
-                            ...chartOptions,
-                            hAxis: {
-                                title: 'Month'
-                            }
-                        }}
-                    />)}
-                </PlaceholderCard>
-            </Grid>
+            {allDataLoaded && (
+                <>
+                    <Grid item xs={12} sm={12} md={6}>
+                        <SelectBox
+                            label="Author"
+                            initialSelection="All"
+                            items={preparedAuthors}
+                            onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6}>
+                        <SelectBox
+                            label="Repository"
+                            initialSelection="All"
+                            items={preparedRepositories}
+                            onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <PlaceholderCard title="Total PRs" loading={loadingPullRequests}>
+                            <Typography variant="h4">{pullRequestCount?.[0].amount}</Typography>
+                        </PlaceholderCard>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <PlaceholderCard title="Total Repositories" loading={loadingRepositories}>
+                            <Typography variant="h4">{repositoryCount?.[0].amount}</Typography>
+                        </PlaceholderCard>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <PlaceholderCard title="Total Contributors" loading={loadingContributors}>
+                            <Typography variant="h4">{contributorCount?.[0].amount}</Typography>
+                        </PlaceholderCard>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <PlaceholderCard title="Pull requests per week (past year)" loading={loadingWeeklyData}>
+                            <ReactApexChart
+                                options={{
+                                    ...chartOptions,
+                                    xaxis: {
+                                        ...chartOptions.xaxis,
+                                        categories: weeklyPullRequestCounts?.map(item => format(item.orderedField, 'dd-MM-yyyy (\'week\' II)')),
+                                    }
+                                }}
+                                series={[
+                                    {
+                                        name: 'Pull requests',
+                                        data: weeklyPullRequestCounts?.map(item => item.amount) ?? [],
+                                        type: 'bar'
+                                    }
+                                ]}
+                                type="bar"
+                            />
+                        </PlaceholderCard>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <PlaceholderCard title="Pull requests per month (past year)" loading={loadingMonthlyData}>
+                            <ReactApexChart
+                                options={{
+                                    ...chartOptions,
+                                    xaxis: {
+                                        ...chartOptions.xaxis,
+                                        categories: monthlyPullRequestCounts?.map(item => format(item.orderedField, 'MMMM yyyy')),
+                                    }
+                                }}
+                                series={[{
+                                    name: 'Pull requests',
+                                    data: monthlyPullRequestCounts?.map(item => item.amount) ?? [],
+                                    type: 'bar'
+                                }]}
+                                type="bar"
+                            />
+                        </PlaceholderCard>
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={12}>
+                        <PlaceholderCard title="Contribution treemap (past year)" loading={loadingPerRepoData}>
+                            <ReactApexChart
+                                options={{
+                                    ...chartOptions,
+                                    chart: {
+                                        ...chartOptions.chart,
+                                        type: 'treemap'
+                                    }
+                                }}
+                                series={[{
+                                    data: pullRequestsPerRepository?.map(item => ({
+                                        x: item.orderedField,
+                                        y: item.amount
+                                    })) ?? [],
+                                }]}
+                                type="treemap"
+                            />
+                        </PlaceholderCard>
+                    </Grid>
+                </>
+            )}
         </Grid>
     );
 
 }
+
 export default Home;

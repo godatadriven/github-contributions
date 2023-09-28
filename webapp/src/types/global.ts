@@ -25,3 +25,8 @@ export interface OrderedCounter<T> {
     orderedField: T;
     amount: number;
 }
+
+export interface SelectBoxItem {
+    value: string;
+    label: string;
+}

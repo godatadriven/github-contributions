@@ -21,7 +21,7 @@ export default function GlobalAppBar({
     onToggleMode
  }: GlobalAppBarProps) {
     return (
-        <Box sx={{ flexGrow: 1, marginBottom: '50px' }}>
+        <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar>
                     <IconButton

@@ -1,6 +1,12 @@
-import { CircularProgress, Container } from '@mui/material';
+import { CircularProgress, Container, Typography } from '@mui/material';
 
-function GlobalSpinner() {
+interface GlobalSpinnerProps {
+    text?: string
+}
+
+function GlobalSpinner({
+    text
+}: GlobalSpinnerProps) {
     return (
         <Container
             fixed
@@ -12,6 +18,7 @@ function GlobalSpinner() {
             }}
         >
             <CircularProgress />
+            {!!text && <Typography variant="h6" marginLeft="20px">{text}</Typography>}
         </Container>);
 }
 
