@@ -52,7 +52,7 @@ function Home() {
     const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
     const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(pullRequestCountQuery);
     const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(repoCountQuery);
-    const { data: contributorCount, loading: loadingConbributors } = useQuery<Counter>(contributorCountQuery);
+    const { data: contributorCount, loading: loadingContributors } = useQuery<Counter>(contributorCountQuery);
     const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(weeklyPullRequestCountQuery);
     const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(monthlyPullRequestCountQuery);
     const { data: pullRequestsPerRepository, loading: loadingPerRepoData } = useQuery<OrderedCounter<string>>(pullRequestsPerRepoQuery);
@@ -192,7 +192,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
-                        <PlaceholderCard title="Total Contributors" loading={loadingConbributors}>
+                        <PlaceholderCard title="Total Contributors" loading={loadingContributors}>
                             <Typography variant="h4">{contributorCount?.[0].amount}</Typography>
                         </PlaceholderCard>
                     </Grid>
