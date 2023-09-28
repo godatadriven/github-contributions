@@ -183,100 +183,94 @@ function Home() {
             {allDataLoaded && (
                 <>
                     <Grid item xs={12} sm={12} md={6}>
-                        {!!preparedAuthors && (<SelectBox
+                        <SelectBox
                             label="Author"
                             initialSelection="All"
                             items={preparedAuthors}
                             onChangeValue={onChangeAuthorSelectBox}
-                        />)}
+                        />
                     </Grid>
                     <Grid item xs={12} sm={12} md={6}>
-                        {!!repositories && (<SelectBox
+                        <SelectBox
                             label="Repository"
                             initialSelection="All"
                             items={preparedRepositories}
                             onChangeValue={onChangeRepositorySelectBox}
-                        />)}
+                        />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                         <PlaceholderCard title="Total PRs" loading={loadingPullRequests}>
-                            {!!pullRequestCount && (<Typography variant="h4">{pullRequestCount[0].amount}</Typography>)}
+                            <Typography variant="h4">{pullRequestCount?.[0].amount}</Typography>
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                         <PlaceholderCard title="Total Repositories" loading={loadingRepositories}>
-                            {!!repositoryCount && (<Typography variant="h4">{repositoryCount[0].amount}</Typography>)}
+                            <Typography variant="h4">{repositoryCount?.[0].amount}</Typography>
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                         <PlaceholderCard title="Total Contributors" loading={loadingConbributors}>
-                            {!!contributorCount && (<Typography variant="h4">{contributorCount[0].amount}</Typography>)}
+                            <Typography variant="h4">{contributorCount?.[0].amount}</Typography>
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <PlaceholderCard title="Pull requests per week (past year)" loading={loadingWeeklyData}>
-                            {!!weeklyPullRequestCounts && (
-                                <ReactApexChart
-                                    options={{
-                                        ...chartOptions,
-                                        xaxis: {
-                                            ...chartOptions.xaxis,
-                                            categories: weeklyPullRequestCounts.map(item => format(item.orderedField, 'dd-MM-yyyy (\'week\' II)')),
-                                        }
-                                    }}
-                                    series={[
-                                        {
-                                            name: 'Pull requests',
-                                            data: weeklyPullRequestCounts.map(item => item.amount),
-                                            type: 'bar'
-                                        }
-                                    ]}
-                                    type="bar"
-                                />
-                            )}
+                            <ReactApexChart
+                                options={{
+                                    ...chartOptions,
+                                    xaxis: {
+                                        ...chartOptions.xaxis,
+                                        categories: weeklyPullRequestCounts?.map(item => format(item.orderedField, 'dd-MM-yyyy (\'week\' II)')),
+                                    }
+                                }}
+                                series={[
+                                    {
+                                        name: 'Pull requests',
+                                        data: weeklyPullRequestCounts?.map(item => item.amount) ?? [],
+                                        type: 'bar'
+                                    }
+                                ]}
+                                type="bar"
+                            />
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <PlaceholderCard title="Pull requests per month (past year)" loading={loadingMonthlyData}>
-                            {!!monthlyPullRequestCounts && (
-                                <ReactApexChart
-                                    options={{
-                                        ...chartOptions,
-                                        xaxis: {
-                                            ...chartOptions.xaxis,
-                                            categories: monthlyPullRequestCounts.map(item => format(item.orderedField, 'MMMM yyyy')),
-                                        }
-                                    }}
-                                    series={[{
-                                        name: 'Pull requests',
-                                        data: monthlyPullRequestCounts.map(item => item.amount),
-                                        type: 'bar'
-                                    }]}
-                                    type="bar"
-                                />
-                            )}
+                            <ReactApexChart
+                                options={{
+                                    ...chartOptions,
+                                    xaxis: {
+                                        ...chartOptions.xaxis,
+                                        categories: monthlyPullRequestCounts?.map(item => format(item.orderedField, 'MMMM yyyy')),
+                                    }
+                                }}
+                                series={[{
+                                    name: 'Pull requests',
+                                    data: monthlyPullRequestCounts?.map(item => item.amount) ?? [],
+                                    type: 'bar'
+                                }]}
+                                type="bar"
+                            />
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
                         <PlaceholderCard title="Contribution treemap (past year)" loading={loadingPerRepoData}>
-                            {!!pullRequestsPerRepository && (
-                                <ReactApexChart
-                                    options={{
-                                        ...chartOptions,
-                                        chart: {
-                                            ...chartOptions.chart,
-                                            type: 'treemap'
-                                        }
-                                    }}
-                                    series={[{
-                                        data: pullRequestsPerRepository.map(item => ({
-                                            x: item.orderedField,
-                                            y: item.amount
-                                        })),
-                                    }]}
-                                    type="treemap"
-                                />
-                            )}
+                            <ReactApexChart
+                                options={{
+                                    ...chartOptions,
+                                    chart: {
+                                        ...chartOptions.chart,
+                                        type: 'treemap'
+                                    }
+                                }}
+                                series={[{
+                                    data: pullRequestsPerRepository?.map(item => ({
+                                        x: item.orderedField,
+                                        y: item.amount
+                                    })) ?? [],
+                                }]}
+                                type="treemap"
+                            />
                         </PlaceholderCard>
                     </Grid>
                 </>
