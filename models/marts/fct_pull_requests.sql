@@ -12,7 +12,7 @@ select
     pull_requests.title,
     pull_requests.body,
     pull_requests.user_login as author,
-    authors.organization as author_organzation,
+    authors.organization as author_organization,
     pull_requests.author_association,
     pull_requests.owner_and_repository.full_repository_name,
     pull_requests.owner_and_repository.owner,

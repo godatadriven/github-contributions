@@ -21,7 +21,7 @@ function Home() {
     const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter];
 
     const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests;';
-    const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organzation);';
+    const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
     const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests;';
     const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
