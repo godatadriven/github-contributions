@@ -41,14 +41,7 @@ function Home() {
         GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
         ORDER BY orderedField;
     `;
-    const pullRequestsPerRepoQuery = `
-        SELECT repository AS orderedField,
-               COUNT(DISTINCT title) AS amount
-        FROM main_marts.fct_pull_requests
-         ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
-        GROUP BY repository
-        ORDER BY amount DESC;
-    `;
+    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC;`;
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
     const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
@@ -259,7 +252,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
-                        <PlaceholderCard title="Contribution treemap (past year)" loading={loadingPerRepoData}>
+                        <PlaceholderCard title="Contribution treemap" loading={loadingPerRepoData}>
                             <ReactApexChart
                                 options={{
                                     ...chartOptions,
