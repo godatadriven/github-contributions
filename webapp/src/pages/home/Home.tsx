@@ -214,7 +214,7 @@ function Home() {
                             label="Author organizations"
                             initialSelection="All"
                             items={preparedOrganizations}
-                            onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'organization')}
+                            onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'author_organization')}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={6}>
