@@ -19,8 +19,8 @@ function Home() {
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
     const filters = [authorFilter, repositoryFilter, ownerFilter];
 
-    const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests;';
-    const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests;';
+    const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests ORDER BY lower(author);';
+    const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
     const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
