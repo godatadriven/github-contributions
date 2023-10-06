@@ -16,10 +16,12 @@ function Home() {
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
-    const filters = [authorFilter, repositoryFilter];
+    const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
+    const filters = [authorFilter, repositoryFilter, ownerFilter];
 
     const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests;';
     const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests;';
+    const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
     const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
@@ -31,7 +33,7 @@ function Home() {
         GROUP BY DATE_TRUNC('week', CAST(created_at AS DATE))
         ORDER BY orderedField;
     `;
-    const monthlyPullRequestCountQuery =         `
+    const monthlyPullRequestCountQuery = `
         SELECT DATE_TRUNC('month', CAST(created_at AS DATE)) AS orderedField,
                COUNT(DISTINCT title) AS amount
         FROM main_marts.fct_pull_requests
@@ -50,6 +52,7 @@ function Home() {
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
     const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
+    const { data: owners } = useQuery<{ owner: string }>(ownerQuery);
     const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(pullRequestCountQuery);
     const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(repoCountQuery);
     const { data: contributorCount, loading: loadingContributors } = useQuery<Counter>(contributorCountQuery);
@@ -74,6 +77,15 @@ function Home() {
         }
         return ['All'];
     }, [repositories]);
+
+    const preparedOwners = useMemo<string[]>(() => {
+        if (owners) {
+            const prepData = owners.map(item => item.owner);
+            prepData.unshift('All');
+            return prepData;
+        }
+        return ['All'];
+    }, [owners]);
 
     const onChangeSelectBox = (value: string, filterSetter: (filter: QueryFilter | undefined) => void, column: string) => {
         if (value === 'All') {
@@ -146,7 +158,8 @@ function Home() {
             monthlyPullRequestCounts &&
             pullRequestsPerRepository &&
             authors &&
-            repositories
+            repositories &&
+            owners
         ) {
             setAllDataLoaded(true); // so the UI triggers only one rerender
         }
@@ -158,7 +171,8 @@ function Home() {
         monthlyPullRequestCounts,
         pullRequestsPerRepository,
         authors,
-        repositories
+        repositories,
+        owners
     ]);
 
     return (
@@ -179,6 +193,14 @@ function Home() {
                             initialSelection="All"
                             items={preparedRepositories}
                             onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6}>
+                        <SelectBox
+                            label="Repository owner"
+                            initialSelection="All"
+                            items={preparedOwners}
+                            onChangeValue={(value) => onChangeSelectBox(value, setOwnerFilter, 'owner')}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
