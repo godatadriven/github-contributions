@@ -172,7 +172,7 @@ function Home() {
         <Grid container spacing={2}>
             {allDataLoaded && (
                 <>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <SelectBox
                             label="Author"
                             initialSelection="All"
@@ -180,7 +180,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <SelectBox
                             label="Repository"
                             initialSelection="All"
@@ -188,7 +188,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <SelectBox
                             label="Repository owner"
                             initialSelection="All"
