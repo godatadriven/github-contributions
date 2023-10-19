@@ -1,25 +1,23 @@
 import { Box, Slider, Typography, } from '@mui/material';
 import { useState } from 'react';
 
-interface SliderProps {
+interface DiscreteSliderProps {
     label: string;
     title: string;
     defaultValue: number;
-    stepSize: number;
-    minValue: number;
-    maxValue: number;
     onChangeValue: (value: number) => void;
+    step: number;
+    min: number;
+    max: number;
 }
 
 function DiscreteSlider({
     label,
     title,
     defaultValue,
-    stepSize,
-    minValue,
-    maxValue,
     onChangeValue,
-}: SliderProps) {
+    ...rest
+}: DiscreteSliderProps) {
     const [selected, setSelected] = useState(defaultValue);
 
     function handleChange(_: Event, value: number | number[]) {
@@ -36,10 +34,8 @@ function DiscreteSlider({
           aria-label={label}
           defaultValue={selected}
           valueLabelDisplay="auto"
-          step={stepSize}
-          min={minValue}
-          max={maxValue}
           onChange={handleChange}
+          {...rest}
         />
       </Box>
     );

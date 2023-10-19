@@ -156,9 +156,9 @@ function Trends() {
                                 label="Stars"
                                 title="Number of Stars"
                                 defaultValue={5}
-                                stepSize={5}
-                                minValue={0}
-                                maxValue={100}
+                                step={5}
+                                min={0}
+                                max={100}
                                 onChangeValue={(value) => onChangeStarSlider(value)}
                             />
                         </Grid>
@@ -167,9 +167,9 @@ function Trends() {
                                 label="Recensy"
                                 title="Recensy in Months"
                                 defaultValue={1}
-                                stepSize={1}
-                                minValue={0}
-                                maxValue={12}
+                                step={1}
+                                min={0}
+                                max={12}
                                 onChangeValue={(value) => onChangeRecensySlider(value)}
                             />
                         </Grid>
