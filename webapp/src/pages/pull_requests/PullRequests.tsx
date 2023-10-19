@@ -20,7 +20,8 @@ function PullRequests() {
     if (pullRequests) {
         const columns = Object.keys(pullRequests[0]).map(key => ({
             field: key,
-            headerName: key.toUpperCase()
+            headerName: key.toUpperCase(),
+            flex: 1,
         }));
 
         return (
@@ -33,6 +34,17 @@ function PullRequests() {
                     pagination: {
                         paginationModel: { page: 0, pageSize: 15 },
                     },
+                    columns: {
+                        columnVisibilityModel: {
+                            url: false,
+                            body: false,
+                            updated_at: false,
+                            created_at: false,
+                            closed_at: false,
+                            draft: false,
+                            repository: false,
+                        },
+                   },
                 }}
                 pageSizeOptions={[15, 20, 50, 100]}
             />
