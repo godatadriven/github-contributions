@@ -20,9 +20,8 @@ function Home() {
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
     const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter];
 
-    const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests;';
-    const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
-    const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests;';
+    const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests ORDER BY lower(author);';
+    const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
     const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
@@ -43,14 +42,7 @@ function Home() {
         GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
         ORDER BY orderedField;
     `;
-    const pullRequestsPerRepoQuery = `
-        SELECT repository AS orderedField,
-               COUNT(DISTINCT title) AS amount
-        FROM main_marts.fct_pull_requests
-         ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
-        GROUP BY repository
-        ORDER BY amount DESC;
-    `;
+    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC;`;
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
     const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
@@ -193,7 +185,7 @@ function Home() {
         <Grid container spacing={2}>
             {allDataLoaded && (
                 <>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <SelectBox
                             label="Author"
                             initialSelection="All"
@@ -201,7 +193,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <SelectBox
                             label="Repository"
                             initialSelection="All"
@@ -209,7 +201,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <SelectBox
                             label="Author organizations"
                             initialSelection="All"
@@ -281,7 +273,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
-                        <PlaceholderCard title="Contribution treemap (past year)" loading={loadingPerRepoData}>
+                        <PlaceholderCard title="Contribution treemap" loading={loadingPerRepoData}>
                             <ReactApexChart
                                 options={{
                                     ...chartOptions,
