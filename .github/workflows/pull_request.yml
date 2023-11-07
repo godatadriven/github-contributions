@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'models/**'
+      - 'github_contributions/**'
 env:
   DUCKDB_PATH: github_contributions.duckdb
 
