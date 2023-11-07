@@ -21,6 +21,7 @@ function Home() {
     const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter];
 
     const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests ORDER BY lower(author);';
+    const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
     const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
     const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
@@ -185,7 +186,7 @@ function Home() {
         <Grid container spacing={2}>
             {allDataLoaded && (
                 <>
-                    <Grid item xs={12} sm={12} md={4}>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
                             label="Author"
                             initialSelection="All"
@@ -193,7 +194,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4}>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
                             label="Repository"
                             initialSelection="All"
@@ -201,15 +202,15 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4}>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
-                            label="Author organizations"
+                            label="Author organization"
                             initialSelection="All"
                             items={preparedOrganizations}
                             onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'author_organization')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
                             label="Repository owner"
                             initialSelection="All"
