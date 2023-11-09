@@ -79,5 +79,3 @@ dist-ssr
 *.sln
 *.sw?
 *.duckdb
-.envrc
-package-lock.yml
