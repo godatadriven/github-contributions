@@ -1,12 +1,15 @@
-with authors as (
-    select *
-    FROM (VALUES
-        {%- for author in var("authors") -%}
-            ('{{ author.name }}', '{{  author.organization }}')
-            {%- if not loop.last %}, {%- endif -%}
-        {%- endfor -%}
-    ) Author(name, organization)
-)
+with
+    authors as (
+        select *
+        from
+            (
+                values
+                    {%- for author in var("authors") -%}
+                        ('{{ author.name }}', '{{  author.organization }}')
+                        {%- if not loop.last %}, {%- endif -%}
+                    {%- endfor -%}
+            ) author(name, organization)
+    )
 
 select
     pull_requests.title,
@@ -26,8 +29,5 @@ select
     pull_requests.pull_request_merged_at as merged_at,
     pull_requests.reactions_total_count,
     pull_requests.html_url as url,
-from
-        {{ ref("int_pull_requests") }} AS pull_requests
-    left join
-         authors
-    ON pull_requests.user_login = authors.name
+from {{ ref("int_pull_requests") }} as pull_requests
+left join authors on pull_requests.user_login = authors.name

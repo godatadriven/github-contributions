@@ -8,10 +8,9 @@ models:
           - not_null
           - unique
       - name: user_login
-# TODO(anyone) temporarily disabled test because it keeps failing, debug and revert this later
-#        tests:
-#          - accepted_values:
-#              values: "{{ var('author_string').split(',') }}"
+        tests:
+          - only_valid_authors:
+              valid_authors: "{{ var('author_string').split(',') }}"
 
   - name: stg_repositories
     tests:
