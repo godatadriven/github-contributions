@@ -10,7 +10,7 @@ models:
       - name: user_login
         tests:
           - only_valid_authors:
-              valid_authors: "{{ var('author_string').split(',') }}"
+              authors: "{{ var('author_string').split(',') }}"
 
   - name: stg_repositories
     tests:

@@ -1,4 +1,4 @@
-{% test only_valid_authors(model, column_name, valid_authors) %}
+{% test only_valid_authors(model, column_name, authors) %}
 
 with validation as (
     select
@@ -11,7 +11,7 @@ validation_errors as (
         author
     from validation
     where author not in (
-        {%- for author in valid_authors -%}
+        {%- for author in authors -%}
             '{{ author | lower }}'{% if not loop.last %},{% endif %}
         {%- endfor -%}
     )
