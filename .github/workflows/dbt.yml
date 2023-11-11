@@ -13,6 +13,7 @@ env:
 jobs:
   dbt:
     runs-on: self-hosted
+    timeout-minutes: 10080
     steps:
       - uses: actions/checkout@v2
 

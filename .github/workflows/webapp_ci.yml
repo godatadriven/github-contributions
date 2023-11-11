@@ -3,7 +3,7 @@ name: Web-app CI
 on:
   pull_request:
     paths:
-      - 'webapp/**'
+      - "webapp/**"
 env:
   WORKING_DIRECTORY: ./webapp
 

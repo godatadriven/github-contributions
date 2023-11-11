@@ -1,18 +1,33 @@
+with
+    authors as (
+        select *
+        from
+            (
+                values
+                    {%- for author in var("authors") -%}
+                        ('{{ author.name }}', '{{  author.organization }}')
+                        {%- if not loop.last %}, {%- endif -%}
+                    {%- endfor -%}
+            ) author(name, organization)
+    )
+
 select
-    title,
-    body,
-    user_login as author,
-    author_association,
-    owner_and_repository.full_repository_name,
-    owner_and_repository.owner,
-    owner_and_repository.repository,
-    state,
-    draft,
-    comments,
-    created_at,
-    updated_at,
-    closed_at,
-    pull_request_merged_at as merged_at,
-    reactions_total_count,
-    html_url as url,
-from {{ ref("int_pull_requests") }}
+    pull_requests.title,
+    pull_requests.body,
+    pull_requests.user_login as author,
+    authors.organization as author_organization,
+    pull_requests.author_association,
+    pull_requests.owner_and_repository.full_repository_name,
+    pull_requests.owner_and_repository.owner,
+    pull_requests.owner_and_repository.repository,
+    pull_requests.state,
+    pull_requests.draft,
+    pull_requests.comments,
+    pull_requests.created_at,
+    pull_requests.updated_at,
+    pull_requests.closed_at,
+    pull_requests.pull_request_merged_at as merged_at,
+    pull_requests.reactions_total_count,
+    pull_requests.html_url as url,
+from {{ ref("int_pull_requests") }} as pull_requests
+left join authors on pull_requests.user_login = authors.name

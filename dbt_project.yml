@@ -71,8 +71,6 @@ vars:
       organization: Xebia
     - name: pawel-big-lebowski
       organization: Xebia
-    - name: dgniewek
-      organization: Xebia
     - name: santhin
       organization: Xebia
     - name: Lasica
@@ -133,8 +131,6 @@ vars:
       organization: Xebia
     - name: OmnipotentOwl
       organization: Xebia
-    - name: ramonvermeulen
-      organization: Xebia
     - name: sanderaernouts
       organization: Xebia
     - name: sujithq
@@ -146,6 +142,4 @@ vars:
     - name: tiborhercz
       organization: Xebia
     - name: Yeseh
-      organization: Xebia
-    - name: mwiewior
       organization: Xebia

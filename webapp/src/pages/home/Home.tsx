@@ -15,11 +15,13 @@ function Home() {
     const theme = useTheme();
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
+    const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
-    const filters = [authorFilter, repositoryFilter, ownerFilter];
+    const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter];
 
     const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests ORDER BY lower(author);';
+    const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
     const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
     const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
@@ -44,6 +46,7 @@ function Home() {
     const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC;`;
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
+    const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
     const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
     const { data: owners } = useQuery<{ owner: string }>(ownerQuery);
     const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(pullRequestCountQuery);
@@ -61,6 +64,15 @@ function Home() {
         }
         return ['All'];
     }, [authors]);
+
+    const preparedOrganizations = useMemo<string[]>(() => {
+        if (organizations) {
+            const prepData = organizations.map(item => item.organization);
+            prepData.unshift('All');
+            return prepData;
+        }
+        return ['All'];
+    }, [organizations]);
 
     const preparedRepositories = useMemo<string[]>(() => {
         if (repositories) {
@@ -151,6 +163,7 @@ function Home() {
             monthlyPullRequestCounts &&
             pullRequestsPerRepository &&
             authors &&
+            organizations &&
             repositories &&
             owners
         ) {
@@ -164,6 +177,7 @@ function Home() {
         monthlyPullRequestCounts,
         pullRequestsPerRepository,
         authors,
+        organizations,
         repositories,
         owners
     ]);
@@ -172,7 +186,7 @@ function Home() {
         <Grid container spacing={2}>
             {allDataLoaded && (
                 <>
-                    <Grid item xs={12} sm={12} md={4}>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
                             label="Author"
                             initialSelection="All"
@@ -180,7 +194,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4}>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
                             label="Repository"
                             initialSelection="All"
@@ -188,7 +202,15 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={4}>
+                    <Grid item xs={12} sm={12} md={3}>
+                        <SelectBox
+                            label="Author organization"
+                            initialSelection="All"
+                            items={preparedOrganizations}
+                            onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'author_organization')}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={3}>
                         <SelectBox
                             label="Repository owner"
                             initialSelection="All"
