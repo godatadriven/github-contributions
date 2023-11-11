@@ -25,7 +25,7 @@ jobs:
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
-          python -m pip install dbt-duckdb==1.6.0 github_contributions/
+          python -m pip install dbt-duckdb==1.7.0 github_contributions/
           dbt deps
 
       - name: dbt build
