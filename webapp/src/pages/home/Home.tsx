@@ -8,9 +8,17 @@ import { format } from 'date-fns';
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
 import ReactApexChart from 'react-apexcharts';
 import SelectBox from '../../components/SelectBox.tsx';
+import Slider from '../../components/Slider.tsx';
 import useQuery from '../../hooks/useQuery.ts';
 
+function valueLabelFormat(value: number) {
+    return `${value} ⭐+`;
+}
 
+function calculateValue(value: number) {
+    const options = [0, 10, 20, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
+    return options[value];
+}
 function Home() {
     const theme = useTheme();
     const [allDataLoaded, setAllDataLoaded] = useState(false);
@@ -20,6 +28,31 @@ function Home() {
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
     const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter];
 
+    const weekStartsQuery = `
+        SELECT DATE_TRUNC('week', start_date) AS week_start
+        FROM (
+            WITH recursive weeks AS (
+                SELECT CURRENT_DATE - INTERVAL '1 year' + INTERVAL '1 week' AS start_date, 
+                    CURRENT_DATE AS end_date
+                UNION ALL
+                SELECT start_date + INTERVAL '1 week',
+                    end_date
+                FROM weeks
+                WHERE start_date < end_date
+            )
+            SELECT start_date
+            FROM weeks
+        )
+    `;
+    const PullRequestCountByWeekQuery = `
+        SELECT DATE_TRUNC('week', CAST(created_at AS DATE)) AS orderedField,
+               COUNT(DISTINCT title) AS amount
+        FROM main_marts.fct_pull_requests
+        ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
+        GROUP BY DATE_TRUNC('week', CAST(created_at AS DATE))
+        ORDER BY orderedField
+    `;
+
     const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests ORDER BY lower(author);';
     const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
     const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
@@ -28,11 +61,11 @@ function Home() {
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
     const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
     const weeklyPullRequestCountQuery = `
-        SELECT DATE_TRUNC('week', CAST(created_at AS DATE)) AS orderedField,
-               COUNT(DISTINCT title) AS amount
-        FROM main_marts.fct_pull_requests
-        ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
-        GROUP BY DATE_TRUNC('week', CAST(created_at AS DATE))
+        WITH week_starts AS (${weekStartsQuery}),
+            weekly_prs AS (${PullRequestCountByWeekQuery})
+        SELECT week_starts.week_start as orderedField, COALESCE(weekly_prs.amount, 0) AS amount
+        FROM week_starts
+                 LEFT JOIN weekly_prs ON week_starts.week_start = weekly_prs.orderedField
         ORDER BY orderedField;
     `;
     const monthlyPullRequestCountQuery = `
@@ -43,7 +76,7 @@ function Home() {
         GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
         ORDER BY orderedField;
     `;
-    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC;`;
+    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC LIMIT 100;`;
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
     const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
@@ -186,7 +219,7 @@ function Home() {
         <Grid container spacing={2}>
             {allDataLoaded && (
                 <>
-                    <Grid item xs={12} sm={12} md={3}>
+                    <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Author"
                             initialSelection="All"
@@ -194,7 +227,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={3}>
+                    <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Repository"
                             initialSelection="All"
@@ -202,7 +235,7 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={3}>
+                    <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Author organization"
                             initialSelection="All"
@@ -210,12 +243,28 @@ function Home() {
                             onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'author_organization')}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={3}>
+                    <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Repository owner"
                             initialSelection="All"
                             items={preparedOwners}
                             onChangeValue={(value) => onChangeSelectBox(value, setOwnerFilter, 'owner')}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={4}>
+                        <Slider
+                            label="Minimum Stars"
+                            sliderProps={{
+                                defaultValue: 2,
+                                max: 10,
+                                step: 1,
+                                min: 0,
+                                size: 'small',
+                                valueLabelDisplay: 'auto',
+                                scale: calculateValue,
+                                getAriaValueText: valueLabelFormat,
+                                valueLabelFormat: valueLabelFormat,
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
@@ -274,7 +323,7 @@ function Home() {
                         </PlaceholderCard>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12}>
-                        <PlaceholderCard title="Contribution treemap" loading={loadingPerRepoData}>
+                        <PlaceholderCard title="Top 100 Contributed Repositories" loading={loadingPerRepoData}>
                             <ReactApexChart
                                 options={{
                                     ...chartOptions,
