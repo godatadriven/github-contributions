@@ -14,7 +14,7 @@ import useQuery from '../../hooks/useQuery.ts';
 
 function Home() {
     const theme = useTheme();
-    const defaultSelection = 'All'
+    const defaultSelection = 'All';
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
     const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
@@ -56,7 +56,7 @@ function Home() {
         ORDER BY orderedField
     `;
 
-    const organizationQuery = `SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ORDER BY lower(pr.author_organization);`;
+    const organizationQuery = 'SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ORDER BY lower(pr.author_organization);';
     const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter])} ORDER BY lower(pr.author);`;
     const ownerQuery = `SELECT distinct pr.owner FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter])} ORDER BY lower(pr.owner);`;
     const repositoryQuery = `SELECT distinct pr.repository FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, ownerFilter])} ORDER BY lower(pr.repository)`;
@@ -80,7 +80,7 @@ function Home() {
         GROUP BY DATE_TRUNC('month', CAST(pr.created_at AS DATE))
         ORDER BY orderedField;
     `;
-    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests LEFT JOIN main_marts.fct_repositories rep ON full_repository_name = rep.full_name ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC LIMIT 100;`;
+    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC LIMIT 100;`;
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
     const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
@@ -129,22 +129,22 @@ function Home() {
         return [defaultSelection];
     }, [owners]);
 
-    const calculateValue = (value: number) => {
+    const calculateValue = useCallback((value: number) => {
         const options = [0, 10, 20, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
         return options[value];
-    };
+    }, []);
 
     const valueLabelFormat = (value: number) => {
         return `${value} ⭐+`;
     };
 
-    const debounceFn = useCallback(debounce(setStarsFilter, 500), []);
+    const debounceFn = debounce(setStarsFilter, 500);
     const onChangeStars = useCallback((_event: Event, newValue: number | number[]) => {
         debounceFn({
             ...starsFilter,
             target: calculateValue(newValue as number).toString()
         });
-    }, [starsFilter, calculateValue]);
+    }, [starsFilter, debounceFn, calculateValue]);
 
 
     const chartOptions: ApexOptions = {
@@ -214,8 +214,8 @@ function Home() {
             });
         }
         resetFilters?.forEach((resetFilter) => resetFilter(undefined));
-        resetSelections?.forEach((resetSelection) => resetSelection(defaultSelection))
-    }
+        resetSelections?.forEach((resetSelection) => resetSelection(defaultSelection));
+    };
 
     useEffect(() => {
         onFilterChange(
