@@ -14,6 +14,7 @@ import useQuery from '../../hooks/useQuery.ts';
 
 function Home() {
     const theme = useTheme();
+    const defaultSelection = 'All'
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
     const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
@@ -24,6 +25,10 @@ function Home() {
         operator: '>=',
         target: '2'
     });
+    const [organization, setOrganization] = useState(defaultSelection);
+    const [author, setAuthor] = useState(defaultSelection);
+    const [repositoryOwner, setRepositoryOwner] = useState(defaultSelection);
+    const [repository, setRepository] = useState(defaultSelection);
     const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter, starsFilter];
     const weekStartsQuery = `
         SELECT DATE_TRUNC('week', start_date) AS week_start
@@ -51,10 +56,10 @@ function Home() {
         ORDER BY orderedField
     `;
 
-    const authorQuery = 'SELECT distinct author FROM main_marts.fct_pull_requests ORDER BY lower(author);';
-    const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
-    const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
-    const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
+    const organizationQuery = `SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ORDER BY lower(pr.author_organization);`;
+    const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter])} ORDER BY lower(pr.author);`;
+    const ownerQuery = `SELECT distinct pr.owner FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter])} ORDER BY lower(pr.owner);`;
+    const repositoryQuery = `SELECT distinct pr.repository FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, ownerFilter])} ORDER BY lower(pr.repository)`;
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
@@ -91,50 +96,38 @@ function Home() {
     const preparedAuthors = useMemo<string[]>(() => {
         if (authors) {
             const prepData = authors.map(item => item.author);
-            prepData.unshift('All');
+            prepData.unshift(defaultSelection);
             return prepData;
         }
-        return ['All'];
+        return [defaultSelection];
     }, [authors]);
 
     const preparedOrganizations = useMemo<string[]>(() => {
         if (organizations) {
             const prepData = organizations.map(item => item.organization);
-            prepData.unshift('All');
+            prepData.unshift(defaultSelection);
             return prepData;
         }
-        return ['All'];
+        return [defaultSelection];
     }, [organizations]);
 
     const preparedRepositories = useMemo<string[]>(() => {
         if (repositories) {
             const prepData = repositories.map(item => item.repository);
-            prepData.unshift('All');
+            prepData.unshift(defaultSelection);
             return prepData;
         }
-        return ['All'];
+        return [defaultSelection];
     }, [repositories]);
 
     const preparedOwners = useMemo<string[]>(() => {
         if (owners) {
             const prepData = owners.map(item => item.owner);
-            prepData.unshift('All');
+            prepData.unshift(defaultSelection);
             return prepData;
         }
-        return ['All'];
+        return [defaultSelection];
     }, [owners]);
-
-    const onChangeSelectBox = (value: string, filterSetter: (filter: QueryFilter | undefined) => void, column: string) => {
-        if (value === 'All') {
-            filterSetter(undefined);
-        } else {
-            filterSetter({
-                column,
-                operator: '=',
-                target: `'${value}'`,
-            });
-        }
-    };
 
     const calculateValue = (value: number) => {
         const options = [0, 10, 20, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
@@ -145,13 +138,13 @@ function Home() {
         return `${value} ⭐+`;
     };
 
+    const debounceFn = useCallback(debounce(setStarsFilter, 500), []);
     const onChangeStars = useCallback((_event: Event, newValue: number | number[]) => {
-        setStarsFilter({
+        debounceFn({
             ...starsFilter,
             target: calculateValue(newValue as number).toString()
         });
-    }, [starsFilter]);
-    const debounceFn = useCallback(() => debounce(onChangeStars, 600), [onChangeStars]);
+    }, [starsFilter, calculateValue]);
 
 
     const chartOptions: ApexOptions = {
@@ -204,6 +197,60 @@ function Home() {
         },
     };
 
+    const onFilterChange = (
+        value: string,
+        setFilter: (filter: QueryFilter | undefined) => void,
+        column: string,
+        resetFilters?: ((filter: QueryFilter | undefined) => void)[],
+        resetSelections?: ((selection: string) => void)[]
+    ) => {
+        if (value == defaultSelection) {
+            setFilter(undefined);
+        } else {
+            setFilter({
+                column,
+                operator: '=',
+                target: `'${value}'`
+            });
+        }
+        resetFilters?.forEach((resetFilter) => resetFilter(undefined));
+        resetSelections?.forEach((resetSelection) => resetSelection(defaultSelection))
+    }
+
+    useEffect(() => {
+        onFilterChange(
+            organization,
+            setOrganizationFilter,
+            'pr.author_organization',
+            [setAuthorFilter, setOwnerFilter, setRepositoryFilter],
+            [setAuthor, setRepositoryOwner, setRepository]
+        );
+    }, [organization]);
+
+    useEffect(() => {
+        onFilterChange(
+            author,
+            setAuthorFilter,
+            'pr.author',
+            [setOwnerFilter, setRepositoryFilter],
+            [setRepositoryOwner, setRepository]
+        );
+    }, [author]);
+
+    useEffect(() => {
+        onFilterChange(
+            repositoryOwner,
+            setOwnerFilter,
+            'pr.owner',
+            [setRepositoryFilter],
+            [setRepository]
+        );
+    }, [repositoryOwner]);
+
+    useEffect(() => {
+        onFilterChange(repository, setRepositoryFilter, 'pr.repository');
+    }, [repository]);
+
     useEffect(() => {
         if (
             pullRequestCount &&
@@ -238,34 +285,34 @@ function Home() {
                 <>
                     <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
-                            label="Author"
-                            initialSelection="All"
-                            items={preparedAuthors}
-                            onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'pr.author')}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={2}>
-                        <SelectBox
-                            label="Repository"
-                            initialSelection="All"
-                            items={preparedRepositories}
-                            onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'pr.repository')}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={2}>
-                        <SelectBox
-                            label="Author organization"
-                            initialSelection="All"
+                            label="Organization"
+                            value={organization}
                             items={preparedOrganizations}
-                            onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'pr.author_organization')}
+                            onChangeValue={setOrganization}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={2}>
+                        <SelectBox
+                            label="Author"
+                            value={author}
+                            items={preparedAuthors}
+                            onChangeValue={setAuthor}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Repository owner"
-                            initialSelection="All"
+                            value={repositoryOwner}
                             items={preparedOwners}
-                            onChangeValue={(value) => onChangeSelectBox(value, setOwnerFilter, 'pr.owner')}
+                            onChangeValue={setRepositoryOwner}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={2}>
+                        <SelectBox
+                            label="Repository"
+                            value={repository}
+                            items={preparedRepositories}
+                            onChangeValue={setRepository}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={4}>
@@ -273,11 +320,12 @@ function Home() {
                             label="Minimum Stars"
                             sliderProps={{
                                 max: 10,
+                                defaultValue: 2,
                                 step: 1,
                                 min: 0,
                                 size: 'small',
                                 valueLabelDisplay: 'auto',
-                                onChange: debounceFn,
+                                onChange: onChangeStars,
                                 scale: calculateValue,
                                 valueLabelFormat: valueLabelFormat,
                             }}
