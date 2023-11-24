@@ -1,7 +1,7 @@
 import { Counter, OrderedCounter } from '../../types/global.ts';
 import { Grid, Typography, useTheme } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
-import useQueryFilter, { QueryFilter } from '../../hooks/useQueryFilter.ts';
+import { QueryFilter, useQueryFilter } from '../../hooks/useQueryFilter.ts';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApexOptions } from 'apexcharts';
 import { format } from 'date-fns';
 
@@ -9,16 +9,9 @@ import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
 import ReactApexChart from 'react-apexcharts';
 import SelectBox from '../../components/SelectBox.tsx';
 import Slider from '../../components/Slider.tsx';
+import debounce from 'lodash/debounce';
 import useQuery from '../../hooks/useQuery.ts';
 
-function valueLabelFormat(value: number) {
-    return `${value} ⭐+`;
-}
-
-function calculateValue(value: number) {
-    const options = [0, 10, 20, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
-    return options[value];
-}
 function Home() {
     const theme = useTheme();
     const [allDataLoaded, setAllDataLoaded] = useState(false);
@@ -26,8 +19,12 @@ function Home() {
     const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
-    const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter];
-
+    const [starsFilter, setStarsFilter] = useState<QueryFilter>({
+        column: 'rep.stargazers_count',
+        operator: '>=',
+        target: '2'
+    });
+    const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter, starsFilter];
     const weekStartsQuery = `
         SELECT DATE_TRUNC('week', start_date) AS week_start
         FROM (
@@ -45,11 +42,12 @@ function Home() {
         )
     `;
     const PullRequestCountByWeekQuery = `
-        SELECT DATE_TRUNC('week', CAST(created_at AS DATE)) AS orderedField,
+        SELECT DATE_TRUNC('week', CAST(pr.created_at AS DATE)) AS orderedField,
                COUNT(DISTINCT title) AS amount
-        FROM main_marts.fct_pull_requests
-        ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
-        GROUP BY DATE_TRUNC('week', CAST(created_at AS DATE))
+        FROM main_marts.fct_pull_requests pr
+        LEFT JOIN main_marts.fct_repositories rep ON full_repository_name = rep.full_name
+        ${useQueryFilter([...filters, { column: 'CAST(pr.created_at AS DATE)', operator: '>=', target: 'date_add(CURRENT_DATE(), INTERVAL \'-1 year\')' }])}
+        GROUP BY DATE_TRUNC('week', CAST(pr.created_at AS DATE))
         ORDER BY orderedField
     `;
 
@@ -57,9 +55,9 @@ function Home() {
     const organizationQuery = 'SELECT distinct author_organization AS organization FROM main_marts.fct_pull_requests ORDER BY lower(author_organization);';
     const repositoryQuery = 'SELECT distinct repository FROM main_marts.fct_pull_requests ORDER BY lower(repository);';
     const ownerQuery = 'SELECT distinct owner FROM main_marts.fct_pull_requests ORDER BY lower(owner);';
-    const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
-    const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
-    const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests ${useQueryFilter(filters)};`;
+    const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
+    const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
+    const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const weeklyPullRequestCountQuery = `
         WITH week_starts AS (${weekStartsQuery}),
             weekly_prs AS (${PullRequestCountByWeekQuery})
@@ -69,14 +67,15 @@ function Home() {
         ORDER BY orderedField;
     `;
     const monthlyPullRequestCountQuery = `
-        SELECT DATE_TRUNC('month', CAST(created_at AS DATE)) AS orderedField,
-               COUNT(DISTINCT title) AS amount
-        FROM main_marts.fct_pull_requests
-         ${useQueryFilter([...filters, { column: 'CAST(created_at AS DATE)', operator: '>=', target: 'DATE_TRUNC(\'month\', CURRENT_DATE() - INTERVAL \'1 year\') + INTERVAL \'1 month\'' }])}
-        GROUP BY DATE_TRUNC('month', CAST(created_at AS DATE))
+        SELECT DATE_TRUNC('month', CAST(pr.created_at AS DATE)) AS orderedField,
+               COUNT(DISTINCT pr.title) AS amount
+        FROM main_marts.fct_pull_requests pr
+        LEFT JOIN main_marts.fct_repositories rep ON full_repository_name = rep.full_name
+         ${useQueryFilter([...filters, { column: 'CAST(pr.created_at AS DATE)', operator: '>=', target: 'DATE_TRUNC(\'month\', CURRENT_DATE() - INTERVAL \'1 year\') + INTERVAL \'1 month\'' }])}
+        GROUP BY DATE_TRUNC('month', CAST(pr.created_at AS DATE))
         ORDER BY orderedField;
     `;
-    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC LIMIT 100;`;
+    const pullRequestsPerRepoQuery = `SELECT repository AS orderedField, COUNT(DISTINCT title) AS amount FROM main_marts.fct_pull_requests LEFT JOIN main_marts.fct_repositories rep ON full_repository_name = rep.full_name ${useQueryFilter([...filters])} GROUP BY repository ORDER BY amount DESC LIMIT 100;`;
 
     const { data: authors } = useQuery<{ author: string }>(authorQuery);
     const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
@@ -136,6 +135,24 @@ function Home() {
             });
         }
     };
+
+    const calculateValue = (value: number) => {
+        const options = [0, 10, 20, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
+        return options[value];
+    };
+
+    const valueLabelFormat = (value: number) => {
+        return `${value} ⭐+`;
+    };
+
+    const onChangeStars = useCallback((_event: Event, newValue: number | number[]) => {
+        setStarsFilter({
+            ...starsFilter,
+            target: calculateValue(newValue as number).toString()
+        });
+    }, [starsFilter]);
+    const debounceFn = useCallback(() => debounce(onChangeStars, 600), [onChangeStars]);
+
 
     const chartOptions: ApexOptions = {
         chart: {
@@ -224,7 +241,7 @@ function Home() {
                             label="Author"
                             initialSelection="All"
                             items={preparedAuthors}
-                            onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'author')}
+                            onChangeValue={(value) => onChangeSelectBox(value, setAuthorFilter, 'pr.author')}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={2}>
@@ -232,7 +249,7 @@ function Home() {
                             label="Repository"
                             initialSelection="All"
                             items={preparedRepositories}
-                            onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'repository')}
+                            onChangeValue={(value) => onChangeSelectBox(value, setRepositoryFilter, 'pr.repository')}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={2}>
@@ -240,7 +257,7 @@ function Home() {
                             label="Author organization"
                             initialSelection="All"
                             items={preparedOrganizations}
-                            onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'author_organization')}
+                            onChangeValue={(value) => onChangeSelectBox(value, setOrganizationFilter, 'pr.author_organization')}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={2}>
@@ -248,21 +265,20 @@ function Home() {
                             label="Repository owner"
                             initialSelection="All"
                             items={preparedOwners}
-                            onChangeValue={(value) => onChangeSelectBox(value, setOwnerFilter, 'owner')}
+                            onChangeValue={(value) => onChangeSelectBox(value, setOwnerFilter, 'pr.owner')}
                         />
                     </Grid>
                     <Grid item xs={12} sm={12} md={4}>
                         <Slider
                             label="Minimum Stars"
                             sliderProps={{
-                                defaultValue: 2,
                                 max: 10,
                                 step: 1,
                                 min: 0,
                                 size: 'small',
                                 valueLabelDisplay: 'auto',
+                                onChange: debounceFn,
                                 scale: calculateValue,
-                                getAriaValueText: valueLabelFormat,
                                 valueLabelFormat: valueLabelFormat,
                             }}
                         />

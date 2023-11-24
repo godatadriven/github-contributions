@@ -20,4 +20,4 @@ function useQueryFilter(filters: (QueryFilter | undefined)[]): string {
     return `WHERE ${whereClause}`;
 }
 
-export default useQueryFilter;
+export { useQueryFilter };
