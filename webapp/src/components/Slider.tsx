@@ -11,7 +11,7 @@ function Slider({
 
     return (
         <FormControl fullWidth>
-            <FormLabel id="demo-simple-select-label">{label}</FormLabel>
+            <FormLabel id={label}>{label}</FormLabel>
             <MSlider
                 {...sliderProps}
             />
