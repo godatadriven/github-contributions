@@ -56,10 +56,10 @@ function Home() {
         ORDER BY orderedField
     `;
 
-    const organizationQuery = 'SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ORDER BY lower(pr.author_organization);';
-    const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter])} ORDER BY lower(pr.author);`;
-    const ownerQuery = `SELECT distinct pr.owner FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter])} ORDER BY lower(pr.owner);`;
-    const repositoryQuery = `SELECT distinct pr.repository FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, ownerFilter])} ORDER BY lower(pr.repository)`;
+    const organizationQuery = `SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([starsFilter])} ORDER BY lower(pr.author_organization);`;
+    const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter, starsFilter])} ORDER BY lower(pr.author);`;
+    const ownerQuery = `SELECT distinct pr.owner FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, starsFilter])} ORDER BY lower(pr.owner);`;
+    const repositoryQuery = `SELECT distinct pr.repository FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, ownerFilter, starsFilter])} ORDER BY lower(pr.repository)`;
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
