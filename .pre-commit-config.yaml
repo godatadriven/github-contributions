@@ -10,4 +10,9 @@ repos:
     rev: v3.0.0
     hooks:
       - id: prettier
-        exclude: "^(dbt_packages|target)/.*"
+        exclude: "^(dbt_packages|target|webapp)/.*"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.0
+    hooks:
+      - id: ruff
+      - id: ruff-format

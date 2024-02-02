@@ -7,7 +7,6 @@ from typing import Any
 
 import frozendict
 import pandas as pd
-import requests
 from dbt.adapters.duckdb.plugins import BasePlugin
 from dbt.adapters.duckdb.utils import SourceConfig
 
@@ -30,7 +29,7 @@ def setup_logger(info: bool = False, debug: bool = False) -> None:
         log_level = logging.INFO
     else:
         log_level = logging.WARNING
-    
+
     if debug:
         date_format = "%Y-%m-%d %H:%M:%S"
         log_format = (
@@ -40,18 +39,19 @@ def setup_logger(info: bool = False, debug: bool = False) -> None:
     else:
         date_format = "%H:%M:%S"
         log_format = "%(asctime)s  %(message)s"
-    
+
     package_name = __name__.split(".")[0]
     logger = logging.getLogger(package_name)
-    
+
     formatter = logging.Formatter(log_format, datefmt=date_format)
     formatter.converter = time.gmtime
-    
+
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
-    
+
     logger.setLevel(log_level)
     logger.addHandler(handler)
+
 
 def extract_repositories_from_pull_requests(pull_requests: pd.DataFrame) -> list[str]:
     """Extract repositories from pull requests
@@ -82,12 +82,12 @@ class Plugin(BasePlugin):
         log_debug = plugin_config.get("debug", False)
         github_token = plugin_config.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
         use_cache = plugin_config.get("cache", False)
-        
+
         setup_logger(info=log_info, debug=log_debug)
-        
+
         self.headers = frozendict.frozendict(github_api.create_headers(github_token))
         self.repositories = None
-        
+
         self.methods = {
             "pull_requests": github_api.search_author_public_pull_requests,
             "repositories": github_api.get_repository,
@@ -114,7 +114,7 @@ class Plugin(BasePlugin):
             "get_repositories_from_pull_requests",
             False,
         )
-        
+
         df = None
         if resource == "pull_requests" or get_repositories_from_pull_requests:
             authors = {author["name"] for author in source_config.get("authors", [])}
@@ -129,5 +129,5 @@ class Plugin(BasePlugin):
 
         if df is None:
             raise ValueError(f"Unrecognized resource: {resource}")
-        
+
         return df

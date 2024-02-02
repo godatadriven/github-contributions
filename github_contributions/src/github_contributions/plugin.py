@@ -7,7 +7,6 @@ from typing import Any
 
 import frozendict
 import pandas as pd
-import requests
 from dbt.adapters.duckdb.plugins import BasePlugin
 from dbt.adapters.duckdb.utils import SourceConfig
 
@@ -54,6 +53,7 @@ def setup_logger(info: bool = False, debug: bool = False) -> None:
 
     logger.setLevel(log_level)
     logger.addHandler(handler)
+
 
 def extract_repositories_from_pull_requests(pull_requests: pd.DataFrame) -> list[str]:
     """Extract repositories from pull requests

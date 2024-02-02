@@ -10,7 +10,7 @@ models:
       - name: lower(user_login)
         tests:
           - accepted_values:
-              values: "{{ var('author_string').split(',') | map(\"lower\") | list }}"
+              values: '{{ var(''author_string'').split('','') | map("lower") | list }}'
 
   - name: stg_repositories
     tests:

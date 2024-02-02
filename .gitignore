@@ -81,3 +81,4 @@ dist-ssr
 *.duckdb
 .envrc
 package-lock.yml
+*.pyc

@@ -39,9 +39,7 @@ def wait_for_rate_limit_to_reset(response: Response) -> Response:
     if rate_limit == "0" or message == rate_limit_exceeded_message:
         rate_limit_reset = int(response.headers.get("X-RateLimit-Reset"))
         wait_time = int(rate_limit_reset - time.time() + wait_buffer + 1)
-        logger.info(
-            "Waiting %s seconds for Github API rate limit to reset", wait_time
-        )
+        logger.info("Waiting %s seconds for Github API rate limit to reset", wait_time)
         time.sleep(max(wait_time, wait_buffer))
     else:
         response.raise_for_status()
@@ -127,7 +125,9 @@ def search_author_public_pull_requests(
     out : pd.DataFrame
         The author's public pull requests
     """
-    search_url = f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
+    search_url = (
+        f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
+    )
     df = pd.concat(
         (
             pd.DataFrame(response.json()["items"])

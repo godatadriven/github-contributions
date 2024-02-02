@@ -12,47 +12,47 @@ jobs:
     environment: azure
     timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Azure authenticate
-      uses: azure/login@v1
-      with:
-        creds: '{"clientId":"${{ vars.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
+      - name: Azure authenticate
+        uses: azure/login@v1
+        with:
+          creds: '{"clientId":"${{ vars.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
 
-    - name: Deploy runner
-      run: |
-        set -eu  # fail on error
+      - name: Deploy runner
+        run: |
+          set -eu  # fail on error
 
-        RG_NAME="rg-cor-github-contributions"
-        VM_NAME="vm-runner-$(date +%Y-%m-%d)"
-        VNET_NAME="vnet-cor-github-contributions"
-        SUBNET_NAME="snet-github-runners"
-        RUNNER_VERSION="2.311.0"
+          RG_NAME="rg-cor-github-contributions"
+          VM_NAME="vm-runner-$(date +%Y-%m-%d)"
+          VNET_NAME="vnet-cor-github-contributions"
+          SUBNET_NAME="snet-github-runners"
+          RUNNER_VERSION="2.311.0"
 
-        # https://docs.github.com/en/rest/actions/self-hosted-runners?apiVersion=2022-11-28#create-a-registration-token-for-a-repository
-        # you need read/write access on administrator on the repo
-        GITHUB_TOKEN=${{ secrets.ACTION_TOKEN }}
-        GITHUB_URL=${{ github.repository }}
-        GITHUB_TOKEN_URL="https://api.github.com/repos/${{ github.repository }}/actions/runners/registration-token"
-        RUNNER_TOKEN=$(curl -sX POST -H "Authorization: token ${GITHUB_TOKEN}" ${GITHUB_TOKEN_URL} | jq -r .token)
+          # https://docs.github.com/en/rest/actions/self-hosted-runners?apiVersion=2022-11-28#create-a-registration-token-for-a-repository
+          # you need read/write access on administrator on the repo
+          GITHUB_TOKEN=${{ secrets.ACTION_TOKEN }}
+          GITHUB_URL=${{ github.repository }}
+          GITHUB_TOKEN_URL="https://api.github.com/repos/${{ github.repository }}/actions/runners/registration-token"
+          RUNNER_TOKEN=$(curl -sX POST -H "Authorization: token ${GITHUB_TOKEN}" ${GITHUB_TOKEN_URL} | jq -r .token)
 
-        function delete_vm() {
-          local NAME=$1
-          local RG_NAME=$2
-          local DISK_ID=$(az vm show --name $NAME --resource-group $RG_NAME --query storageProfile.osDisk.managedDisk.id -o tsv)
-          az vm delete --yes --name $NAME --resource-group $RG_NAME
-          az disk delete --yes --ids $DISK_ID
-          az network nic delete --name "${NAME}VMNic" --resource-group $RG_NAME
-          az network nsg delete --name "${NAME}NSG" --resource-group $RG_NAME
-        }
+          function delete_vm() {
+            local NAME=$1
+            local RG_NAME=$2
+            local DISK_ID=$(az vm show --name $NAME --resource-group $RG_NAME --query storageProfile.osDisk.managedDisk.id -o tsv)
+            az vm delete --yes --name $NAME --resource-group $RG_NAME
+            az disk delete --yes --ids $DISK_ID
+            az network nic delete --name "${NAME}VMNic" --resource-group $RG_NAME
+            az network nsg delete --name "${NAME}NSG" --resource-group $RG_NAME
+          }
 
-        # delete old runners
-        OLD_NAMES=$(az vm list --query "[?resourceGroup == '$RG_NAME'].name" -o tsv)
-        for OLD_NAME in $OLD_NAMES; do
-          delete_vm $OLD_NAME $RG_NAME
-        done
+          # delete old runners
+          OLD_NAMES=$(az vm list --query "[?resourceGroup == '$RG_NAME'].name" -o tsv)
+          for OLD_NAME in $OLD_NAMES; do
+            delete_vm $OLD_NAME $RG_NAME
+          done
 
-        az vm create -g $RG_NAME -n $VM_NAME --public-ip-address "" --vnet-name $VNET_NAME --subnet $SUBNET_NAME --size Standard_B1ms --image Ubuntu2204 --generate-ssh-keys --assign-identity [system] --enable-agent true --enable-auto-update true
-        az vm run-command create --name "Install-Deps" -g $RG_NAME --vm-name $VM_NAME --script 'apt-get update && apt-get install -y unzip git'
-        az vm run-command create --name "Install-Docker" -g $RG_NAME --vm-name $VM_NAME --script 'curl -sSL https://get.docker.io/ | sh'
-        az vm run-command create --name "Install-Agent" -g $RG_NAME --vm-name $VM_NAME --timeout-in-seconds 3600 --script 'export RUNNER_ALLOW_RUNASROOT="1" && mkdir actions-runner && cd actions-runner && curl -L -s https://github.com/actions/runner/releases/download/v$VERSION/actions-runner-linux-x64-$VERSION.tar.gz | tar xz && ./config.sh --url https://github.com/$URL --token $TOKEN --unattended && ./run.sh & ' --parameters VERSION=$RUNNER_VERSION URL=$GITHUB_URL TOKEN=$RUNNER_TOKEN
+          az vm create -g $RG_NAME -n $VM_NAME --public-ip-address "" --vnet-name $VNET_NAME --subnet $SUBNET_NAME --size Standard_B1ms --image Ubuntu2204 --generate-ssh-keys --assign-identity [system] --enable-agent true --enable-auto-update true
+          az vm run-command create --name "Install-Deps" -g $RG_NAME --vm-name $VM_NAME --script 'apt-get update && apt-get install -y unzip git'
+          az vm run-command create --name "Install-Docker" -g $RG_NAME --vm-name $VM_NAME --script 'curl -sSL https://get.docker.io/ | sh'
+          az vm run-command create --name "Install-Agent" -g $RG_NAME --vm-name $VM_NAME --timeout-in-seconds 3600 --script 'export RUNNER_ALLOW_RUNASROOT="1" && mkdir actions-runner && cd actions-runner && curl -L -s https://github.com/actions/runner/releases/download/v$VERSION/actions-runner-linux-x64-$VERSION.tar.gz | tar xz && ./config.sh --url https://github.com/$URL --token $TOKEN --unattended && ./run.sh & ' --parameters VERSION=$RUNNER_VERSION URL=$GITHUB_URL TOKEN=$RUNNER_TOKEN
