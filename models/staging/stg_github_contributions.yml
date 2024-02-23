@@ -26,3 +26,13 @@ models:
           - accepted_values:
               values:
                 - public
+
+  - name: stg_last_update_per_author
+    columns:
+      - name: user_login
+        tests:
+          - not_null
+          - unique
+      - name: last_update
+        tests:
+          - not_null
