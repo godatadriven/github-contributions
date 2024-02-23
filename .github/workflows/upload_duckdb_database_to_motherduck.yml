@@ -11,7 +11,7 @@ on:
 env:
   DUCKDB_DATABASE: github_contributions
   DUCKDB_PATH: github_contributions.duckdb
-  DUCKDB_VERSION: v0.8.1
+  DUCKDB_VERSION: v0.10.0
 
 jobs:
   upload:

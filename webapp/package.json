@@ -23,7 +23,7 @@
     "@mui/x-data-grid": "^6.14.0",
     "apexcharts": "^3.42.0",
     "date-fns": "^2.30.0",
-    "duckdb-wasm-kit": "0.1.24",
+    "duckdb-wasm-kit": "0.1.29",
     "lodash": "^4.17.21",
     "material-react-table": "^1.15.1",
     "react": "^18.2.0",

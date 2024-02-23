@@ -138,5 +138,5 @@ class Plugin(BasePlugin):
 
         if df is None:
             raise ValueError(f"Unrecognized resource: {resource}")
-
+        df.rename(columns={column: column.replace('.', '_') for column in df.columns}, inplace=True)
         return df

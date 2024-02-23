@@ -130,7 +130,7 @@ def search_author_public_pull_requests(
     )
     df = pd.concat(
         (
-            pd.DataFrame(response.json()["items"])
+            pd.json_normalize(response.json()["items"])
             for author in authors
             for response in paginate(f"{search_url}+author:{author}", headers=headers)
         )
@@ -157,11 +157,11 @@ def get_repository(
         The repository
     """
     repo_url = f"{GITHUB_API_BASE_URL}/repos"
-    df = pd.DataFrame(
-        (
+    df = pd.json_normalize(
+        [
             response.json()
             for repository in repositories
             for response in paginate(f"{repo_url}/{repository}", headers=headers)
-        )
+        ]
     )
     return df
