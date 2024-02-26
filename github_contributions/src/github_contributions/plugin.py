@@ -9,6 +9,7 @@ import frozendict
 import pandas as pd
 from dbt.adapters.duckdb.plugins import BasePlugin
 from dbt.adapters.duckdb.utils import SourceConfig
+from duckdb import DuckDBPyConnection
 
 from . import api as github_api
 
@@ -103,6 +104,20 @@ class Plugin(BasePlugin):
                 method: functools.cache(method_function)
                 for method, method_function in self.methods.items()
             }
+
+    def configure_connection(self, conn: DuckDBPyConnection):
+        """
+        Parameters
+        ----------
+        conn
+
+        Returns
+        -------
+
+        """
+        # we have access to the duckdb connection here, why not (mis)use it to fetch the latest updates per user
+        authors = conn.cursor().execute("SELECT * FROM main_staging.stg_last_update_per_author").fetchall()
+        print(authors)
 
     def load(self, source_config: SourceConfig) -> pd.DataFrame:
         """Load the data for a source.
