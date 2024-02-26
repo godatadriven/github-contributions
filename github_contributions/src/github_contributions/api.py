@@ -62,8 +62,10 @@ def paginate(url: str, **request_arguments: Any) -> Response:
     """
     regex = re.compile('.*<([^>]+)>; rel="next"')
     match_next = True
+    logger = logging.getLogger(__name__)
 
     while match_next:
+        logger.debug(f"Doing request towards: {url}")
         response = requests.get(url, **request_arguments)
         while not response.ok:
             wait_for_rate_limit_to_reset(response)
