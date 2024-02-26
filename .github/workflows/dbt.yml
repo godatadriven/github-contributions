@@ -29,7 +29,7 @@ jobs:
           dbt deps
 
       - name: dbt build
-        run: dbt --log-level debug build
+        run: dbt build
 
       - name: Upload duckdb for Debugging
         uses: actions/upload-artifact@v2
