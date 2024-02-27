@@ -1,9 +1,7 @@
 name: Run data quality checks
 
 # TODO temporary removed triggers for data quality pipeline, since it is failing for a while
-on:
-
-#  workflow_dispatch:
+on: workflow_dispatch
 #  workflow_run:
 #    workflows:
 #      - Run dbt
