@@ -13,4 +13,3 @@ sources:
       - name: src_repositories
         meta:
           resource: repositories
-          get_repositories_from_pull_requests: true

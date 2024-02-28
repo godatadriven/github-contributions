@@ -1,5 +1,5 @@
-REPO_VIEW = ('main_staging', 'stg_repositories')
-AUTHOR_VIEW = ('main_staging', 'stg_last_update_per_author')
+PRS_TABLE = "src_pull_requests"
+REPOS_TABLE = "src_repositories"
 DEFAULT_PR_COLUMNS = [
     "url",
     "repository_url",

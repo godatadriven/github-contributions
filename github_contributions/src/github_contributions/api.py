@@ -2,17 +2,14 @@ import logging
 import re
 import time
 from typing import Any, Optional
-from collections import Counter
 import pandas as pd
 import requests
 from requests.models import Response
 
-from github_contributions.constants import DEFAULT_PR_COLUMNS, DEFAULT_REPO_COLUMNS
-
 GITHUB_API_BASE_URL = "https://api.github.com"
 
 
-def wait_for_rate_limit_to_reset(response: Response) -> Response:
+def wait_for_rate_limit_to_reset(response: Response):
     """Wait for the rate limit to reset.
 
     Parameters
@@ -107,7 +104,9 @@ def create_headers(
     return headers
 
 
-def _prep_and_concat_dfs(initial_df: pd.DataFrame, api_df: pd.DataFrame) -> pd.DataFrame:
+def _prep_and_concat_dfs(
+    initial_df: pd.DataFrame, api_df: pd.DataFrame
+) -> pd.DataFrame:
     """
     prepares and concat the api dataframe to the initial dataframe
 
@@ -121,12 +120,16 @@ def _prep_and_concat_dfs(initial_df: pd.DataFrame, api_df: pd.DataFrame) -> pd.D
     out : pd.DataFrame
         concat of both dataframes
     """
-    api_df.rename(columns={column: column.replace('.', '_') for column in api_df.columns}, inplace=True)
+    api_df.rename(
+        columns={column: column.replace(".", "_") for column in api_df.columns},
+        inplace=True,
+    )
     common_columns = initial_df.columns.intersection(api_df.columns)
     return pd.concat((initial_df, api_df[common_columns]), ignore_index=True)
 
 
 def search_author_public_pull_requests(
+    initial_df: pd.DataFrame,
     authors: set[str],
     headers: dict[str, str],
     author_updates: dict[str, str],
@@ -136,6 +139,9 @@ def search_author_public_pull_requests(
 
     Parameters
     ----------
+    initial_df:
+        Initial dataframe can come from the already existing data in duckdb (incremental load)
+        Or a newly initialized dataframe with only the specified columns
     authors : str
         The authors
     headers : dict[str, str]
@@ -154,7 +160,6 @@ def search_author_public_pull_requests(
     search_url = (
         f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
     )
-    df = pd.DataFrame(columns=DEFAULT_PR_COLUMNS)
     for author in list(authors):
         counter = 0
         last_update = author_updates.get(author)
@@ -162,12 +167,15 @@ def search_author_public_pull_requests(
         for response in paginate(url, headers=headers):
             page_df = pd.json_normalize(response.json()["items"])
             counter += len(page_df)
-            df = _prep_and_concat_dfs(df, page_df)
-        logger.info(f"Handle '{author}' - Fetched {counter} new pull requests {'since ' + last_update if last_update else ''}")
-    return df
+            initial_df = _prep_and_concat_dfs(initial_df, page_df)
+        logger.info(
+            f"Handle '{author}' - Fetched {counter} new pull requests {'since ' + last_update if last_update else ''}"
+        )
+    return initial_df
 
 
 def get_repository(
+    initial_df: pd.DataFrame,
     repositories: set[str],
     headers: dict[str, str],
 ) -> pd.DataFrame:
@@ -175,6 +183,9 @@ def get_repository(
 
     Parameters
     ----------
+    initial_df:
+        Initial dataframe can come from the already existing data in duckdb (incremental load)
+        Or a newly initialized dataframe with only the specified columns
     repositories : str
         The full name of the repositories, like "{owner}/{repo}".
     headers : dict[str, str]
@@ -186,9 +197,8 @@ def get_repository(
         The repository
     """
     repo_url = f"{GITHUB_API_BASE_URL}/repos"
-    df = pd.DataFrame(columns=DEFAULT_REPO_COLUMNS)
     for repository in repositories:
         for response in paginate(f"{repo_url}/{repository}", headers=headers):
             repo_df = pd.json_normalize(response.json())
-            df = _prep_and_concat_dfs(df, repo_df)
-    return df
+            initial_df = _prep_and_concat_dfs(initial_df, repo_df)
+    return initial_df
