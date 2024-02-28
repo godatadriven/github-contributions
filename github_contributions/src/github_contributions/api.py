@@ -2,11 +2,12 @@ import logging
 import re
 import time
 from typing import Any, Optional
-
+from collections import Counter
 import pandas as pd
 import requests
 from requests.models import Response
 
+from github_contributions.constants import DEFAULT_PR_COLUMNS, DEFAULT_REPO_COLUMNS
 
 GITHUB_API_BASE_URL = "https://api.github.com"
 
@@ -106,9 +107,29 @@ def create_headers(
     return headers
 
 
+def _prep_and_concat_dfs(initial_df: pd.DataFrame, api_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    prepares and concat the api dataframe to the initial dataframe
+
+    Parameters
+    ----------
+    initial_df : pd.DataFrame
+    api_df : pd.DataFrame
+
+    Returns
+    -------
+    out : pd.DataFrame
+        concat of both dataframes
+    """
+    api_df.rename(columns={column: column.replace('.', '_') for column in api_df.columns}, inplace=True)
+    common_columns = initial_df.columns.intersection(api_df.columns)
+    return pd.concat((initial_df, api_df[common_columns]), ignore_index=True)
+
+
 def search_author_public_pull_requests(
-    *authors: str,
+    authors: set[str],
     headers: dict[str, str],
+    author_updates: dict[str, str],
     per_page: int = 100,
 ) -> pd.DataFrame:
     """Search for the public pull requests of an author.
@@ -119,6 +140,8 @@ def search_author_public_pull_requests(
         The authors
     headers : dict[str, str]
         The API call headers
+    author_updates : dict[str, str]
+        Dictionary of GitHub handle : latest update for incremental runs
     per_page : int (default: 100)
         The number of results returned per page
 
@@ -127,21 +150,25 @@ def search_author_public_pull_requests(
     out : pd.DataFrame
         The author's public pull requests
     """
+    logger = logging.getLogger(__name__)
     search_url = (
         f"{GITHUB_API_BASE_URL}/search/issues?per_page={per_page}&q=is:public+is:pr"
     )
-    df = pd.concat(
-        (
-            pd.json_normalize(response.json()["items"])
-            for author in authors
-            for response in paginate(f"{search_url}+author:{author}", headers=headers)
-        )
-    )
+    df = pd.DataFrame(columns=DEFAULT_PR_COLUMNS)
+    for author in list(authors):
+        counter = 0
+        last_update = author_updates.get(author)
+        url = f"{search_url}+author:{author}{'+created:>' + last_update if last_update else ''}"
+        for response in paginate(url, headers=headers):
+            page_df = pd.json_normalize(response.json()["items"])
+            counter += len(page_df)
+            df = _prep_and_concat_dfs(df, page_df)
+        logger.info(f"Handle '{author}' - Fetched {counter} new pull requests {'since ' + last_update if last_update else ''}")
     return df
 
 
 def get_repository(
-    *repositories: str,
+    repositories: set[str],
     headers: dict[str, str],
 ) -> pd.DataFrame:
     """Get a repository.
@@ -159,11 +186,9 @@ def get_repository(
         The repository
     """
     repo_url = f"{GITHUB_API_BASE_URL}/repos"
-    df = pd.json_normalize(
-        [
-            response.json()
-            for repository in repositories
-            for response in paginate(f"{repo_url}/{repository}", headers=headers)
-        ]
-    )
+    df = pd.DataFrame(columns=DEFAULT_REPO_COLUMNS)
+    for repository in repositories:
+        for response in paginate(f"{repo_url}/{repository}", headers=headers):
+            repo_df = pd.json_normalize(response.json())
+            df = _prep_and_concat_dfs(df, repo_df)
     return df

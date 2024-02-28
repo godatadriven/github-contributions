@@ -12,9 +12,10 @@ from dbt.adapters.duckdb.utils import SourceConfig
 from duckdb import DuckDBPyConnection
 
 from . import api as github_api
+from .constants import AUTHOR_VIEW, REPO_VIEW
 
 
-def setup_logger(info: bool = False, debug: bool = False) -> None:
+def setup_logger(info: bool = False, debug: bool = False) -> logging.Logger:
     """Setup the logger.
 
     Default log level is warning.
@@ -54,6 +55,7 @@ def setup_logger(info: bool = False, debug: bool = False) -> None:
 
     logger.setLevel(log_level)
     logger.addHandler(handler)
+    return logger
 
 
 def extract_repositories_from_pull_requests(pull_requests: pd.DataFrame) -> list[str]:
@@ -90,10 +92,12 @@ class Plugin(BasePlugin):
         github_token = plugin_config.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
         use_cache = plugin_config.get("cache", False)
 
-        setup_logger(info=log_info, debug=log_debug)
-
+        self.logger = setup_logger(info=log_info, debug=log_debug)
         self.headers = frozendict.frozendict(github_api.create_headers(github_token))
         self.repositories = None
+        self._set_duckdb_entries = False
+        self.duckdb_author_updates = dict()
+        self.duckdb_repositories = set()
 
         self.methods = {
             "pull_requests": github_api.search_author_public_pull_requests,
@@ -105,19 +109,59 @@ class Plugin(BasePlugin):
                 for method, method_function in self.methods.items()
             }
 
-    def configure_connection(self, conn: DuckDBPyConnection):
+    def _filter_out_duckdb_repositories(self, repositories: list[str]) -> set[str]:
         """
+
         Parameters
         ----------
-        conn
+        repositories : list[str]
+            list of repositories that are part of the PRs from different authors
+
+        Returns
+        -------
+        out - set[str]
+            set of repositories that are new, to not do unnecessary API calls for incremental loads
+
+        """
+        self.logger.info("Filtering out duckdb repositories from all repos to get the list of new repos")
+        self.logger.info(f"{self.duckdb_repositories=}")
+        self.logger.info(f"{repositories=}")
+        new_repos = {repo for repo in repositories if repo not in self.duckdb_repositories}
+        self.logger.info(f"{new_repos=}")
+        return new_repos
+
+    def configure_connection(self, conn: DuckDBPyConnection):
+        """
+        This function is called with the DuckDB connection object for every defined source
+        Using this function to be able to query DuckDB for existing records to make incremental loads possible
+
+        Parameters
+        ----------
+        conn : DuckDBPyConnection
 
         Returns
         -------
 
         """
-        # we have access to the duckdb connection here, why not (mis)use it to fetch the latest updates per user
-        authors = conn.cursor().execute("SELECT * FROM main_staging.stg_last_update_per_author").fetchall()
-        print(authors)
+        available_views = conn.cursor().execute("FROM duckdb_views SELECT schema_name, view_name").fetchall()
+        if all((
+                REPO_VIEW in available_views,
+                AUTHOR_VIEW in available_views,
+                not self._set_duckdb_entries
+        )):
+            self.duckdb_author_updates = {
+                author: last_update
+                for author, last_update
+                in conn.cursor().execute(
+                    f"SELECT author, last_update FROM {AUTHOR_VIEW[0]}.{AUTHOR_VIEW[1]}"
+                ).fetchall()
+            }
+            self.duckdb_repositories = {
+                repo[0] for repo in conn.cursor().execute(
+                    f"SELECT name FROM {REPO_VIEW[0]}.{REPO_VIEW[1]}"
+                ).fetchall()
+            }
+            self._set_duckdb_entries = True
 
     def load(self, source_config: SourceConfig) -> pd.DataFrame:
         """Load the data for a source.
@@ -141,17 +185,25 @@ class Plugin(BasePlugin):
 
         df = None
         if resource == "pull_requests" or get_repositories_from_pull_requests:
-            authors = {author["name"] for author in source_config.get("authors", [])}
-            df = self.methods["pull_requests"](*authors, headers=self.headers)
-            self.repositories = extract_repositories_from_pull_requests(df)
+            df = self._pull_requests_to_df(source_config)
         if resource == "repositories":
-            if get_repositories_from_pull_requests:
-                repositories = self.repositories
-            else:
-                repositories = source_config.get("repositories", [])
-            df = self.methods["repositories"](*repositories, headers=self.headers)
+            df = self._repositories_to_df(get_repositories_from_pull_requests, source_config)
 
         if df is None:
             raise ValueError(f"Unrecognized resource: {resource}")
-        df.rename(columns={column: column.replace('.', '_') for column in df.columns}, inplace=True)
+        return df
+
+    def _pull_requests_to_df(self, source_config):
+        authors = {author["name"] for author in source_config.get("authors", [])}
+        df = self.methods["pull_requests"](authors, headers=self.headers, author_updates=self.duckdb_author_updates)
+        self.repositories = extract_repositories_from_pull_requests(df)
+        return df
+
+    def _repositories_to_df(self, get_repositories_from_pull_requests, source_config):
+        if get_repositories_from_pull_requests:
+            repositories = self.repositories
+        else:
+            repositories = source_config.get("repositories", [])
+        filtered_repositories = self._filter_out_duckdb_repositories(repositories=repositories)
+        df = self.methods["repositories"](filtered_repositories, headers=self.headers)
         return df

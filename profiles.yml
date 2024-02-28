@@ -11,4 +11,4 @@ github:
           alias: github_contributions
           config:
             debug: true
-            cache: true
+            cache: false
