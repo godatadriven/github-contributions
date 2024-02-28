@@ -35,6 +35,7 @@ jobs:
           name: ${{ env.DUCKDB_PATH }}
           workflow: dbt.yml
           workflow_conclusion: success
+        continue-on-error: true
 
       - name: dbt build
         run: dbt build --fail-fast
