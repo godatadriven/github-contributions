@@ -1,9 +1,6 @@
 name: "Run dbt"
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 12 * * 4" # Every Thursday at noon
+on: workflow_dispatch
 
 env:
   DBT_PROFILES_DIR: .
