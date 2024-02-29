@@ -162,7 +162,7 @@ def search_author_public_pull_requests(
     )
     for author in list(authors):
         counter = 0
-        last_update = author_updates.get(author)
+        last_update = author_updates.get(author.lower())
         url = f"{search_url}+author:{author}{'+created:>' + last_update if last_update else ''}"
         for response in paginate(url, headers=headers):
             page_df = pd.json_normalize(response.json()["items"])
