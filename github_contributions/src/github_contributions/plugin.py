@@ -175,6 +175,7 @@ class Plugin(BasePlugin):
                 .agg(last_update=("updated_at", "max"))
                 .reset_index()
             )
+            author_updates['user_login'] = author_updates['user_login'].str.lower()
             self._duckdb_known_author_updates = dict(
                 zip(author_updates["user_login"], author_updates["last_update"])
             )
