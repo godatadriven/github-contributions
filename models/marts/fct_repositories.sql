@@ -1,15 +1,3 @@
--- there is no is_incremental() clause
--- this part is handled by the github_contributions duckdb plugin
--- the plugin checks for every author the last_update and only retrieves newer PRs
--- the plugin also selects all repositories that were already ingested, and skips
--- retrieving those from the API
-{{
-    config(
-        materialized="incremental",
-        incremental_strategy="append",
-    )
-}}
-
 select
     full_name,
     description,
