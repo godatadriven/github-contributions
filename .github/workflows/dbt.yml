@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 12 * * *" # Every Day at noon
+
 env:
   DBT_PROFILES_DIR: .
   DUCKDB_PATH: github_contributions.duckdb
