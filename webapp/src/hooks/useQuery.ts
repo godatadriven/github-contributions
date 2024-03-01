@@ -1,4 +1,4 @@
-import { useDuckDbQuery } from 'duckdb-wasm-kit';
+import { useDuckDbQuery } from 'duckdb-wasm-kit/src';
 
 function useQuery<T>(query: string) {
     const { arrow, loading, error } = useDuckDbQuery(query);
