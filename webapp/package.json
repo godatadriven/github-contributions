@@ -46,5 +46,11 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "typescript": "^5.0.2",
     "vite": "^4.5.2"
+  },
+  "overrides": {
+    "@duckdb/duckdb-wasm": "1.28.1-dev153.0",
+    "duckdb-wasm-kit": {
+      "@duckdb/duckdb-wasm": "1.28.1-dev153.0"
+    }
   }
 }
