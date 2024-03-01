@@ -3,7 +3,7 @@ import Router from './router/Router.tsx';
 import { Container, CssBaseline, PaletteMode, ThemeProvider, createTheme } from '@mui/material';
 import { DuckDBAccessMode, DuckDBConfig } from '@duckdb/duckdb-wasm';
 import { useEffect, useState } from 'react';
-import { initializeDuckDb } from 'duckdb-wasm-kit';
+import { initializeDuckDb } from 'duckdb-wasm-kit/src';
 
 import GlobalAppBar from './components/GlobalAppBar.tsx';
 import GlobalAppDrawer from './components/GlobalAppDrawer.tsx';

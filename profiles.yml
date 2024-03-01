@@ -10,5 +10,5 @@ github:
         - module: github_contributions.plugin
           alias: github_contributions
           config:
-            info: true
-            cache: true
+            debug: true
+            cache: false

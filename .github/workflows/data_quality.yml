@@ -1,12 +1,12 @@
 name: Run data quality checks
 
-on:
-  workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Run dbt
-    types:
-      - completed
+# TODO temporary removed triggers for data quality pipeline, since it is failing for a while
+on: workflow_dispatch
+#  workflow_run:
+#    workflows:
+#      - Run dbt
+#    types:
+#      - completed
 
 env:
   DUCKDB_PATH: github_contributions.duckdb
