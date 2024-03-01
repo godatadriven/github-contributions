@@ -124,8 +124,11 @@ def _prep_and_concat_dfs(
         columns={column: column.replace(".", "_") for column in api_df.columns},
         inplace=True,
     )
-    common_columns = initial_df.columns.intersection(api_df.columns)
-    return pd.concat((initial_df, api_df[common_columns]), ignore_index=True)
+    new_df = pd.concat((initial_df, api_df), axis=0)
+    final_df = new_df[initial_df.columns]
+    final_df.reset_index(drop=True, inplace=True)
+    final_df.fillna('', inplace=True)
+    return final_df
 
 
 def search_author_public_pull_requests(
@@ -165,9 +168,10 @@ def search_author_public_pull_requests(
         last_update = author_updates.get(author.lower())
         url = f"{search_url}+author:{author}{'+created:>' + last_update if last_update else ''}"
         for response in paginate(url, headers=headers):
-            page_df = pd.json_normalize(response.json()["items"])
-            counter += len(page_df)
-            initial_df = _prep_and_concat_dfs(initial_df, page_df)
+            if items := response.json().get("items"):
+                page_df = pd.json_normalize(items)
+                counter += len(page_df)
+                initial_df = _prep_and_concat_dfs(initial_df, page_df)
         logger.info(
             f"Handle '{author}' - Fetched {counter} new pull requests {'since ' + last_update if last_update else ''}"
         )
