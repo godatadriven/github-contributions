@@ -204,14 +204,12 @@ function Home() {
             const repo = config.globals.categoryLabels[config.dataPointIndex];
             const fullRepos = await runQuery(db, `SELECT owner, name FROM main_marts.fct_repositories WHERE name='${repo}';`);
             const fullJsonRepos = fullRepos.toArray().map(i => i.toJSON());
-            if (fullJsonRepos) {
-                // in unique scenarios, such as with a lot of forks from one repository
-                // there are cases when one author has PRs on multiple repo owners for the same repo name
-                fullJsonRepos.forEach(fullRepo => {
-                    const url = `https://github.com/${fullRepo?.owner}/${fullRepo?.name}/pulls?q=is:pr+author:${author}`;
-                    window.open(url, '_blank', 'noreferrer');
-                });
-            }
+            // in unique scenarios, such as with a lot of forks from one repository
+            // there are cases when one author has PRs on multiple repo owners for the same repo name
+            fullJsonRepos.forEach(fullRepo => {
+                const url = `https://github.com/${fullRepo?.owner}/${fullRepo?.name}/pulls?q=is:pr+author:${author}`;
+                window.open(url, '_blank', 'noreferrer');
+            });
         }
     }, [author, db]);
 
