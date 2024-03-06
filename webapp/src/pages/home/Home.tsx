@@ -198,7 +198,7 @@ function Home() {
         },
     };
 
-    // @ts-expect-error _ and __ are unused
+    // @ts-expect-error upstream library does not provide typings for event handler arguments
     const onClickTreemapEntry = useCallback(async (_, __, config) => {
         if (db && author !== defaultSelection) {
             const repo = config.globals.categoryLabels[config.dataPointIndex];
