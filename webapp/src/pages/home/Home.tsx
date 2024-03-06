@@ -1,6 +1,7 @@
 import { Counter, OrderedCounter } from '../../types/global.ts';
 import { Grid, Typography, useTheme } from '@mui/material';
 import { QueryFilter, useQueryFilter } from '../../hooks/useQueryFilter.ts';
+import { runQuery, useDuckDb } from 'duckdb-wasm-kit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApexOptions } from 'apexcharts';
 import { format } from 'date-fns';
@@ -13,6 +14,7 @@ import debounce from 'lodash/debounce';
 import useQuery from '../../hooks/useQuery.ts';
 
 function Home() {
+    const { db } = useDuckDb();
     const theme = useTheme();
     const defaultSelection = 'All';
     const [allDataLoaded, setAllDataLoaded] = useState(false);
@@ -55,7 +57,6 @@ function Home() {
         GROUP BY DATE_TRUNC('week', CAST(pr.created_at AS DATE))
         ORDER BY orderedField
     `;
-
     const organizationQuery = `SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([starsFilter])} ORDER BY lower(pr.author_organization);`;
     const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter, starsFilter])} ORDER BY lower(pr.author);`;
     const ownerQuery = `SELECT distinct pr.owner FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, starsFilter])} ORDER BY lower(pr.owner);`;
@@ -196,6 +197,21 @@ function Home() {
             }
         },
     };
+
+    // @ts-expect-error upstream library does not provide typings for event handler arguments
+    const onClickTreemapEntry = useCallback(async (_, __, config) => {
+        if (db && author !== defaultSelection) {
+            const repo = config.globals.categoryLabels[config.dataPointIndex];
+            const fullRepos = await runQuery(db, `SELECT owner, name FROM main_marts.fct_repositories WHERE name='${repo}';`);
+            const fullJsonRepos = fullRepos.toArray().map(i => i.toJSON());
+            // in unique scenarios, such as with a lot of forks from one repository
+            // there are cases when one author has PRs on multiple repo owners for the same repo name
+            fullJsonRepos.forEach(fullRepo => {
+                const url = `https://github.com/${fullRepo?.owner}/${fullRepo?.name}/pulls?q=is:pr+author:${author}`;
+                window.open(url, '_blank', 'noreferrer');
+            });
+        }
+    }, [author, db]);
 
     const onFilterChange = (
         value: string,
@@ -393,8 +409,11 @@ function Home() {
                                     ...chartOptions,
                                     chart: {
                                         ...chartOptions.chart,
-                                        type: 'treemap'
-                                    }
+                                        type: 'treemap',
+                                        events: {
+                                            click: onClickTreemapEntry
+                                        }
+                                    },
                                 }}
                                 series={[{
                                     data: pullRequestsPerRepository?.map(item => ({

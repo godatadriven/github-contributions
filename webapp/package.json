@@ -24,7 +24,7 @@
     "apache-arrow": "^15.0.0",
     "apexcharts": "^3.42.0",
     "date-fns": "^2.30.0",
-    "duckdb-wasm-kit": "git+https://github.com/ramonvermeulen/duckdb-wasm-kit#79be68d994a49a3ee140b3a069030e9e23f0554d",
+    "duckdb-wasm-kit": "0.1.30",
     "lodash": "^4.17.21",
     "material-react-table": "^1.15.1",
     "react": "^18.2.0",
