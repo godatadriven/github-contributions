@@ -5,5 +5,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   assetsInclude: ['src/assets/github_contributions.duckdb'],
   plugins: [react()],
-  base: '/github-contributions/'
+  base: '/github-contributions/',
+  server: {
+    headers: {
+      'Cache-Control': 'public, max-age=604800, immutable'
+    }
+  }
 });
