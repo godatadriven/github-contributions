@@ -1,6 +1,7 @@
 version: 2
 
 models:
+  - name: src_deduplicated_pull_requests
   - name: stg_pull_requests
     columns:
       - name: url
