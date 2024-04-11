@@ -157,4 +157,10 @@ select
     cast(state_reason as integer) as state_reason,
     cast(score as double) as score,
 
-from {{ source("github_contributions", "src_pull_requests") }}
+from {{ 
+    dbt_utils.deduplicate(
+        relation=source("github_contributions", "src_pull_requests"),
+        partition_by='pull_request_url',
+        order_by="updated_at desc",
+   )
+}}
