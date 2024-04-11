@@ -156,5 +156,4 @@ select
     cast(performed_via_github_app as integer) as performed_via_github_app,
     cast(state_reason as integer) as state_reason,
     cast(score as double) as score,
-
-from {{ source("github_contributions", "src_pull_requests") }}
+from {{ ref("src_deduplicated_pull_requests") }}
