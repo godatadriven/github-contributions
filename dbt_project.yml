@@ -98,7 +98,7 @@ vars:
     - name: alycklama
       organization: Xebia
     - name: bschaatsbergen
-      organization: Xebia
+      organization: Hashicorp
     - name: chtzvt
       organization: Xebia
     - name: cloudcosmonaut
