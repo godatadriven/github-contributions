@@ -43,7 +43,7 @@ jobs:
 
       - name: Upload duckdb for Debugging
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: github_contributions_debug_${{ github.run_id }}.duckdb
           path: ${{ env.DUCKDB_PATH }}
@@ -55,7 +55,7 @@ jobs:
 
       - name: Upload duckdb
         if: ${{ success() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: github_contributions.duckdb
           path: ${{ env.DUCKDB_PATH }}
