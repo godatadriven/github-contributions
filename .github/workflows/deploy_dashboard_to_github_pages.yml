@@ -59,7 +59,7 @@ jobs:
         run: npm run build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v4
         with:
           name: github-pages
           path: ${{ env.WORKING_DIRECTORY }}/dist
