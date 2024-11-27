@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download duckdb
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: ${{ env.DUCKDB_PATH }}
           workflow: dbt.yml

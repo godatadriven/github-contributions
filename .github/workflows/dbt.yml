@@ -31,7 +31,7 @@ jobs:
 
       - name: Download duckdb # retrieves .duckdb file from last successful run (last day in happy scenario)
         if: ${{ env.REINGEST_ALL != 'true' }}
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: ${{ env.DUCKDB_PATH }}
           workflow: dbt.yml
