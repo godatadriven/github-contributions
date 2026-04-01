@@ -1,7 +1,7 @@
 import { PullRequest } from '../../types/global.ts';
 
 import GlobalSpinner from '../../components/GlobalSpinner.tsx';
-import MaterialReactTable from 'material-react-table';
+import { MaterialReactTable } from 'material-react-table';
 import useQuery from '../../hooks/useQuery.ts';
 
 function PullRequests() {
@@ -45,7 +45,7 @@ function PullRequests() {
                     density: 'compact',
                     pagination: { pageIndex: 0, pageSize: 15 },
                 }}
-                muiTablePaginationProps={{
+                                muiPaginationProps={{
                     rowsPerPageOptions: [15, 20, 50, 100],
                   }}
             />

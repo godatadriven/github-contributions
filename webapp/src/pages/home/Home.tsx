@@ -1,23 +1,51 @@
+import { ApexChartEventOpts, ApexOptions } from 'apexcharts';
 import { Counter, OrderedCounter } from '../../types/global.ts';
-import { Grid, Typography, useTheme } from '@mui/material';
 import { QueryFilter, useQueryFilter } from '../../hooks/useQueryFilter.ts';
+import { Typography, useTheme } from '@mui/material';
 import { runQuery, useDuckDb } from 'duckdb-wasm-kit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ApexOptions } from 'apexcharts';
-import { format } from 'date-fns';
 
+import Grid from '@mui/material/GridLegacy';
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
 import ReactApexChart from 'react-apexcharts';
 import SelectBox from '../../components/SelectBox.tsx';
 import Slider from '../../components/Slider.tsx';
 import debounce from 'lodash/debounce';
+import { format } from 'date-fns';
 import useQuery from '../../hooks/useQuery.ts';
+
+interface RepositoryRow {
+    owner: string;
+    name: string;
+}
+
+function isRepositoryRow(value: unknown): value is RepositoryRow {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+    return typeof candidate.owner === 'string' && typeof candidate.name === 'string';
+}
+
+function getCategoryLabels(config?: ApexChartEventOpts): string[] | undefined {
+    const globals = config?.w.globals as unknown;
+    if (typeof globals !== 'object' || globals === null) {
+        return undefined;
+    }
+
+    const categoryLabels = (globals as { categoryLabels?: unknown }).categoryLabels;
+    if (!Array.isArray(categoryLabels) || !categoryLabels.every((label) => typeof label === 'string')) {
+        return undefined;
+    }
+
+    return categoryLabels;
+}
 
 function Home() {
     const { db } = useDuckDb();
     const theme = useTheme();
     const defaultSelection = 'All';
-    const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
     const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
@@ -93,6 +121,18 @@ function Home() {
     const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(weeklyPullRequestCountQuery);
     const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(monthlyPullRequestCountQuery);
     const { data: pullRequestsPerRepository, loading: loadingPerRepoData } = useQuery<OrderedCounter<string>>(pullRequestsPerRepoQuery);
+    const allDataLoaded = Boolean(
+        pullRequestCount &&
+        repositoryCount &&
+        contributorCount &&
+        weeklyPullRequestCounts &&
+        monthlyPullRequestCounts &&
+        pullRequestsPerRepository &&
+        authors &&
+        organizations &&
+        repositories &&
+        owners
+    );
 
     const preparedAuthors = useMemo<string[]>(() => {
         if (authors) {
@@ -198,19 +238,34 @@ function Home() {
         },
     };
 
-    // @ts-expect-error upstream library does not provide typings for event handler arguments
-    const onClickTreemapEntry = useCallback(async (_, __, config) => {
-        if (db && author !== defaultSelection) {
-            const repo = config.globals.categoryLabels[config.dataPointIndex];
+    const onClickTreemapEntry = useCallback((_: MouseEvent, __?: unknown, config?: ApexChartEventOpts) => {
+        if (!db || author === defaultSelection) {
+            return;
+        }
+
+        const dataPointIndex = config?.dataPointIndex;
+        const categoryLabels = getCategoryLabels(config);
+        const repo = typeof dataPointIndex === 'number' && Array.isArray(categoryLabels)
+            ? categoryLabels[dataPointIndex]
+            : undefined;
+
+        if (!repo) {
+            return;
+        }
+
+        void (async () => {
             const fullRepos = await runQuery(db, `SELECT owner, name FROM main_marts.fct_repositories WHERE name='${repo}';`);
-            const fullJsonRepos = fullRepos.toArray().map(i => i.toJSON());
+            const fullJsonRepos = (fullRepos.toArray() as { toJSON: () => unknown }[])
+                .map((row) => row.toJSON())
+                .filter(isRepositoryRow);
+
             // in unique scenarios, such as with a lot of forks from one repository
             // there are cases when one author has PRs on multiple repo owners for the same repo name
-            fullJsonRepos.forEach(fullRepo => {
-                const url = `https://github.com/${fullRepo?.owner}/${fullRepo?.name}/pulls?q=is:pr+author:${author}`;
+            fullJsonRepos.forEach((fullRepo) => {
+                const url = `https://github.com/${fullRepo.owner}/${fullRepo.name}/pulls?q=is:pr+author:${author}`;
                 window.open(url, '_blank', 'noreferrer');
             });
-        }
+        })();
     }, [author, db]);
 
     const onFilterChange = (
@@ -266,34 +321,6 @@ function Home() {
     useEffect(() => {
         onFilterChange(repository, setRepositoryFilter, 'pr.repository');
     }, [repository]);
-
-    useEffect(() => {
-        if (
-            pullRequestCount &&
-            repositoryCount &&
-            contributorCount &&
-            weeklyPullRequestCounts &&
-            monthlyPullRequestCounts &&
-            pullRequestsPerRepository &&
-            authors &&
-            organizations &&
-            repositories &&
-            owners
-        ) {
-            setAllDataLoaded(true); // so the UI triggers only one rerender
-        }
-    }, [
-        pullRequestCount,
-        repositoryCount,
-        contributorCount,
-        weeklyPullRequestCounts,
-        monthlyPullRequestCounts,
-        pullRequestsPerRepository,
-        authors,
-        organizations,
-        repositories,
-        owners
-    ]);
 
     return (
         <Grid container spacing={2}>
