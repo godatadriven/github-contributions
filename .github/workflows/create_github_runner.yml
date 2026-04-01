@@ -12,7 +12,7 @@ jobs:
     environment: azure
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure authenticate
         uses: azure/login@v2
