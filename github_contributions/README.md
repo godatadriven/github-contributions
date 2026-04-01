@@ -1,6 +1,6 @@
 # github contributions dbt plugin
 
-This package requires Python 3.10 or newer.
+This package requires Python 3.11 or newer.
 
 Be sure to install the github contributions plugin in edit mode via:
 
