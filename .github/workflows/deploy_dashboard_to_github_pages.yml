@@ -76,7 +76,7 @@ jobs:
       id-token: write
     steps:
       - name: Deploy artifact to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         id: deployment
         with:
           artifact_name: github-pages
