@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.33.1-dev20.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -24,9 +25,11 @@
     "apache-arrow": "^17.0.0",
     "apexcharts": "^3.42.0",
     "date-fns": "^2.30.0",
-    "duckdb-wasm-kit": "0.1.30",
+    "duckdb-wasm-kit": "^0.1.39",
+    "install": "^0.13.0",
     "lodash": "^4.17.21",
     "material-react-table": "^1.15.1",
+    "npm": "^11.12.1",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-async-hook": "^4.0.0",
