@@ -1,28 +1,21 @@
+import { ApexChartEventOpts, ApexOptions } from 'apexcharts';
 import { Counter, OrderedCounter } from '../../types/global.ts';
 import { Grid, Typography, useTheme } from '@mui/material';
 import { QueryFilter, useQueryFilter } from '../../hooks/useQueryFilter.ts';
 import { runQuery, useDuckDb } from 'duckdb-wasm-kit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ApexOptions } from 'apexcharts';
-import { format } from 'date-fns';
 
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
 import ReactApexChart from 'react-apexcharts';
 import SelectBox from '../../components/SelectBox.tsx';
 import Slider from '../../components/Slider.tsx';
 import debounce from 'lodash/debounce';
+import { format } from 'date-fns';
 import useQuery from '../../hooks/useQuery.ts';
 
 interface RepositoryRow {
     owner: string;
     name: string;
-}
-
-interface TreemapClickConfig {
-    dataPointIndex?: number;
-    globals?: {
-        categoryLabels?: string[];
-    };
 }
 
 function isRepositoryRow(value: unknown): value is RepositoryRow {
@@ -34,11 +27,24 @@ function isRepositoryRow(value: unknown): value is RepositoryRow {
     return typeof candidate.owner === 'string' && typeof candidate.name === 'string';
 }
 
+function getCategoryLabels(config?: ApexChartEventOpts): string[] | undefined {
+    const globals = config?.w.globals as unknown;
+    if (typeof globals !== 'object' || globals === null) {
+        return undefined;
+    }
+
+    const categoryLabels = (globals as { categoryLabels?: unknown }).categoryLabels;
+    if (!Array.isArray(categoryLabels) || !categoryLabels.every((label) => typeof label === 'string')) {
+        return undefined;
+    }
+
+    return categoryLabels;
+}
+
 function Home() {
     const { db } = useDuckDb();
     const theme = useTheme();
     const defaultSelection = 'All';
-    const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
     const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
@@ -114,6 +120,18 @@ function Home() {
     const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(weeklyPullRequestCountQuery);
     const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(monthlyPullRequestCountQuery);
     const { data: pullRequestsPerRepository, loading: loadingPerRepoData } = useQuery<OrderedCounter<string>>(pullRequestsPerRepoQuery);
+    const allDataLoaded = Boolean(
+        pullRequestCount &&
+        repositoryCount &&
+        contributorCount &&
+        weeklyPullRequestCounts &&
+        monthlyPullRequestCounts &&
+        pullRequestsPerRepository &&
+        authors &&
+        organizations &&
+        repositories &&
+        owners
+    );
 
     const preparedAuthors = useMemo<string[]>(() => {
         if (authors) {
@@ -219,13 +237,17 @@ function Home() {
         },
     };
 
-    const onClickTreemapEntry = useCallback((_: unknown, __: unknown, config: TreemapClickConfig) => {
+    const onClickTreemapEntry = useCallback((_: MouseEvent, __?: unknown, config?: ApexChartEventOpts) => {
         if (!db || author === defaultSelection) {
             return;
         }
 
-        const dataPointIndex = config.dataPointIndex;
-        const repo = dataPointIndex === undefined ? undefined : config.globals?.categoryLabels?.[dataPointIndex];
+        const dataPointIndex = config?.dataPointIndex;
+        const categoryLabels = getCategoryLabels(config);
+        const repo = typeof dataPointIndex === 'number' && Array.isArray(categoryLabels)
+            ? categoryLabels[dataPointIndex]
+            : undefined;
+
         if (!repo) {
             return;
         }
@@ -298,34 +320,6 @@ function Home() {
     useEffect(() => {
         onFilterChange(repository, setRepositoryFilter, 'pr.repository');
     }, [repository]);
-
-    useEffect(() => {
-        if (
-            pullRequestCount &&
-            repositoryCount &&
-            contributorCount &&
-            weeklyPullRequestCounts &&
-            monthlyPullRequestCounts &&
-            pullRequestsPerRepository &&
-            authors &&
-            organizations &&
-            repositories &&
-            owners
-        ) {
-            setAllDataLoaded(true); // so the UI triggers only one rerender
-        }
-    }, [
-        pullRequestCount,
-        repositoryCount,
-        contributorCount,
-        weeklyPullRequestCounts,
-        monthlyPullRequestCounts,
-        pullRequestsPerRepository,
-        authors,
-        organizations,
-        repositories,
-        owners
-    ]);
 
     return (
         <Grid container spacing={2}>
