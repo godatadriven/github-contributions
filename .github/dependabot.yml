@@ -9,3 +9,12 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosytem: "npm"
+    directory: "/webapp"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "python"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  
