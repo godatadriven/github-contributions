@@ -13,6 +13,27 @@ import Slider from '../../components/Slider.tsx';
 import debounce from 'lodash/debounce';
 import useQuery from '../../hooks/useQuery.ts';
 
+interface RepositoryRow {
+    owner: string;
+    name: string;
+}
+
+interface TreemapClickConfig {
+    dataPointIndex?: number;
+    globals?: {
+        categoryLabels?: string[];
+    };
+}
+
+function isRepositoryRow(value: unknown): value is RepositoryRow {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+    return typeof candidate.owner === 'string' && typeof candidate.name === 'string';
+}
+
 function Home() {
     const { db } = useDuckDb();
     const theme = useTheme();
@@ -198,19 +219,30 @@ function Home() {
         },
     };
 
-    // @ts-expect-error upstream library does not provide typings for event handler arguments
-    const onClickTreemapEntry = useCallback(async (_, __, config) => {
-        if (db && author !== defaultSelection) {
-            const repo = config.globals.categoryLabels[config.dataPointIndex];
+    const onClickTreemapEntry = useCallback((_: unknown, __: unknown, config: TreemapClickConfig) => {
+        if (!db || author === defaultSelection) {
+            return;
+        }
+
+        const dataPointIndex = config.dataPointIndex;
+        const repo = dataPointIndex === undefined ? undefined : config.globals?.categoryLabels?.[dataPointIndex];
+        if (!repo) {
+            return;
+        }
+
+        void (async () => {
             const fullRepos = await runQuery(db, `SELECT owner, name FROM main_marts.fct_repositories WHERE name='${repo}';`);
-            const fullJsonRepos = fullRepos.toArray().map(i => i.toJSON());
+            const fullJsonRepos = (fullRepos.toArray() as { toJSON: () => unknown }[])
+                .map((row) => row.toJSON())
+                .filter(isRepositoryRow);
+
             // in unique scenarios, such as with a lot of forks from one repository
             // there are cases when one author has PRs on multiple repo owners for the same repo name
-            fullJsonRepos.forEach(fullRepo => {
-                const url = `https://github.com/${fullRepo?.owner}/${fullRepo?.name}/pulls?q=is:pr+author:${author}`;
+            fullJsonRepos.forEach((fullRepo) => {
+                const url = `https://github.com/${fullRepo.owner}/${fullRepo.name}/pulls?q=is:pr+author:${author}`;
                 window.open(url, '_blank', 'noreferrer');
             });
-        }
+        })();
     }, [author, db]);
 
     const onFilterChange = (

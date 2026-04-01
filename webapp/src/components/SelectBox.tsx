@@ -14,7 +14,7 @@ function SelectBox({
     onChangeValue,
 }: SelectBoxProps) {
     function onChange(event: SelectChangeEvent) {
-        onChangeValue(event.target.value as string);
+        onChangeValue(event.target.value);
     }
     
     return (
