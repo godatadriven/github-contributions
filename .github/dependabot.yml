@@ -13,7 +13,7 @@ updates:
     directory: "/webapp"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "python"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
