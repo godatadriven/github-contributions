@@ -1,10 +1,11 @@
 import { ApexChartEventOpts, ApexOptions } from 'apexcharts';
 import { Counter, OrderedCounter } from '../../types/global.ts';
-import { Grid, Typography, useTheme } from '@mui/material';
 import { QueryFilter, useQueryFilter } from '../../hooks/useQueryFilter.ts';
+import { Typography, useTheme } from '@mui/material';
 import { runQuery, useDuckDb } from 'duckdb-wasm-kit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import Grid from '@mui/material/GridLegacy';
 import PlaceholderCard from '../../components/PlaceHolderCard.tsx';
 import ReactApexChart from 'react-apexcharts';
 import SelectBox from '../../components/SelectBox.tsx';
