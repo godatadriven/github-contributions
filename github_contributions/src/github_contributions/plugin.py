@@ -12,7 +12,7 @@ from dbt.adapters.duckdb.utils import SourceConfig
 from duckdb import DuckDBPyConnection
 
 from . import api as github_api
-from .constants import REPOS_TABLE, PRS_TABLE, DEFAULT_PR_COLUMNS, DEFAULT_REPO_COLUMNS
+from .constants import REPOS_TABLE, PRS_TABLE, DEFAULT_PR_COLUMNS, DEFAULT_REPO_COLUMNS, COST_CENTERS_TABLE, DEFAULT_COST_CENTER_COLUMNS
 
 
 def setup_logger(info: bool = False, debug: bool = False) -> logging.Logger:
@@ -91,6 +91,7 @@ class Plugin(BasePlugin):
         log_debug = plugin_config.get("debug", False)
         github_token = plugin_config.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
         use_cache = plugin_config.get("cache", False)
+        self.enterprise = plugin_config.get("ENTERPRISE") or os.getenv("GH_ENTERPRISE") or ""
 
         self.logger = setup_logger(info=log_info, debug=log_debug)
         self.headers = frozendict.frozendict(github_api.create_headers(github_token))
@@ -99,6 +100,7 @@ class Plugin(BasePlugin):
         self._duckdb_src_pull_requests_df = pd.DataFrame(columns=DEFAULT_PR_COLUMNS)
         self._duckdb_src_repositories_df = pd.DataFrame(columns=DEFAULT_REPO_COLUMNS)
         self._duckdb_known_author_updates = dict()
+        self._cost_center_users: set[str] = set()
 
         self.methods = {
             "pull_requests": github_api.search_author_public_pull_requests,
@@ -199,6 +201,8 @@ class Plugin(BasePlugin):
         resource = source_config.get("resource")
 
         df = None
+        if resource == "cost_centers":
+            df = self._cost_centers_to_df()
         if resource == "pull_requests":
             authors = {author["name"] for author in source_config.get("authors", [])}
             df = self._pull_requests_to_df(authors)
@@ -209,6 +213,36 @@ class Plugin(BasePlugin):
             raise ValueError(f"Unrecognized resource: {resource}")
         return df
 
+    def _cost_centers_to_df(self) -> pd.DataFrame:
+        """Fetch cost centers from the GitHub Enterprise API and return a DataFrame.
+
+        If no enterprise slug is configured the method returns an empty DataFrame
+        so the rest of the pipeline continues without error.
+
+        Returns
+        -------
+        out : pd.DataFrame
+            Columns: cost_center_name, user_login
+        """
+        if not self.enterprise:
+            self.logger.info(
+                "No enterprise configured (ENTERPRISE plugin config / GH_ENTERPRISE env var). "
+                "Skipping cost-center fetch and returning empty table."
+            )
+            return pd.DataFrame(columns=DEFAULT_COST_CENTER_COLUMNS)
+
+        df = github_api.get_cost_centers(
+            enterprise=self.enterprise,
+            headers=self.headers,
+        )
+        self._cost_center_users = set(df["user_login"].str.lower().tolist())
+        self.logger.info(
+            "Cost centers loaded %d unique users from enterprise '%s'",
+            len(self._cost_center_users),
+            self.enterprise,
+        )
+        return df
+
     def _pull_requests_to_df(self, authors: set[str]):
         """
         Fetches pull requests and returns a pandas dataframe
@@ -216,15 +250,17 @@ class Plugin(BasePlugin):
         Parameters
         ----------
         authors : set[str]
-            set of authors to fetch PRs for
+            set of authors to fetch PRs for (from dbt_project.yml); will be
+            augmented with users discovered via the cost-centers API.
 
         Returns
         -------
         out - pd.DataFrame
         """
+        all_authors = authors | self._cost_center_users
         df = self.methods["pull_requests"](
             initial_df=self._duckdb_src_pull_requests_df,
-            authors=authors,
+            authors=all_authors,
             headers=self.headers,
             author_updates=self._duckdb_known_author_updates,
         )

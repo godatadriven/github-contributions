@@ -12,3 +12,4 @@ github:
           config:
             debug: true
             cache: false
+            ENTERPRISE: "{{ env_var('GH_ENTERPRISE', '') }}"
