@@ -10,7 +10,7 @@ on: workflow_dispatch
 
 env:
   DUCKDB_PATH: github_contributions.duckdb
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: '3.12'
 
 jobs:
   soda_scan:

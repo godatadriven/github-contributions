@@ -8,7 +8,7 @@ on:
 env:
   DBT_PROFILES_DIR: .
   DUCKDB_PATH: github_contributions.duckdb
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: '3.12'
   REINGEST_ALL: false # set to true to mimic a --full-refresh
 
 jobs:

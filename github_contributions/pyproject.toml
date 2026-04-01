@@ -1,13 +1,13 @@
 [build-system]
 requires = [
-    "setuptools >= 40.0.4",
-    "wheel >= 0.29.0",
+    "setuptools >= 68.0.0",
+    "wheel >= 0.41.0",
 ]
 build-backend = 'setuptools.build_meta'
 
 [tool.black]
 line-length = 79
-target-version = ['py39']
+target-version = ['py310']
 
 [tool.isort]
 profile = "black"
