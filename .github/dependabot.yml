@@ -1,23 +1,36 @@
+version: 2
 updates:
-  - package-ecosystem: 'github-actions'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
-    groups:
-      actions-minor:
-        update-types:
-          - minor
-          - patch
-  - package-ecosystem: 'npm'
-    directory: '/webapp'
-    schedule:
-      interval: 'weekly'
-      npm-development:
-        dependency-type: development
-        update-types:
-          - minor
-          - patch
-      npm-production:
-        dependency-type: production
-        update-types:
-          - patch
+- package-ecosystem: 'github-actions'
+  directory: '/'
+  schedule:
+    interval: 'weekly'
+  groups:
+    actions-minor:
+      update-types:
+      - minor
+      - patch
+
+- package-ecosystem: 'npm'
+  directory: '/webapp'
+  schedule:
+    interval: 'weekly'
+  groups:
+    npm-development:
+      dependency-type: development
+      update-types:
+      - minor
+      - patch
+    npm-production:
+      dependency-type: production
+      update-types:
+      - patch
+
+- package-ecosystem: 'pip'
+  directory: '/github_contributions'
+  schedule:
+    interval: 'weekly'
+  groups:
+    python-dependencies:
+      update-types:
+      - minor
+      - patch
