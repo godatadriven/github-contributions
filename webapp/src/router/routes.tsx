@@ -1,16 +1,17 @@
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { NonIndexRouteObject } from 'react-router/dist/lib/context';
+import { RouteObject } from 'react-router-dom';
 import { faCodePullRequest } from '@fortawesome/free-solid-svg-icons/faCodePullRequest';
 import { faHouse } from '@fortawesome/free-solid-svg-icons/faHouse';
 
 import Home from '../pages/home/Home.tsx';
 import PullRequests from '../pages/pull_requests/PullRequests.tsx';
 
-interface CustomRouteObject extends NonIndexRouteObject {
+export type CustomRouteObject = RouteObject & {
+    id: string;
     icon: IconDefinition;
     path: string;
     label: string;
-}
+};
 
 const routes: CustomRouteObject[] = [
     {
