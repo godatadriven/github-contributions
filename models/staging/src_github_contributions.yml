@@ -7,6 +7,9 @@ sources:
       plugin: github_contributions
       authors: "{{ var('authors') }}"
     tables:
+      - name: src_cost_centers
+        meta:
+          resource: cost_centers
       - name: src_pull_requests
         meta:
           resource: pull_requests

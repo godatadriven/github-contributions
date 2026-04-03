@@ -2,6 +2,14 @@ version: 2
 
 models:
   - name: src_deduplicated_pull_requests
+  - name: stg_cost_centers
+    columns:
+      - name: cost_center_name
+        tests:
+          - not_null
+      - name: user_login
+        tests:
+          - not_null
   - name: stg_pull_requests
     columns:
       - name: url
