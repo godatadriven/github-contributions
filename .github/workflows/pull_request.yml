@@ -13,6 +13,8 @@ jobs:
   python_tests:
     runs-on: ubuntu-latest
     name: Run Python Tests
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: ./github_contributions
