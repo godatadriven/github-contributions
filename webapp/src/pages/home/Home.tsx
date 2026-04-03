@@ -120,13 +120,17 @@ function Home() {
     const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
     const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
     const { data: owners } = useQuery<{ owner: string }>(ownerQuery);
-    const { data: costCenters } = useQuery<{ cost_center_name: string }>(costCenterQuery);
+    const { data: costCenters, loading: loadingCostCenters } = useQuery<{ cost_center_name: string }>(costCenterQuery);
     const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(pullRequestCountQuery);
     const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(repoCountQuery);
     const { data: contributorCount, loading: loadingContributors } = useQuery<Counter>(contributorCountQuery);
     const { data: weeklyPullRequestCounts, loading: loadingWeeklyData } = useQuery<OrderedCounter<Date>>(weeklyPullRequestCountQuery);
     const { data: monthlyPullRequestCounts, loading: loadingMonthlyData } = useQuery<OrderedCounter<Date>>(monthlyPullRequestCountQuery);
     const { data: pullRequestsPerRepository, loading: loadingPerRepoData } = useQuery<OrderedCounter<string>>(pullRequestsPerRepoQuery);
+    // costCenters is optional: when fct_cost_centers doesn't exist in the database (e.g. the
+    // table was added to the dbt models but the first dbt run hasn't completed yet at deploy
+    // time), the query will error and costCenters stays undefined.  We must NOT block the rest
+    // of the dashboard on this — we simply hide the filter when the table is absent.
     const allDataLoaded = Boolean(
         pullRequestCount &&
         repositoryCount &&
@@ -138,7 +142,7 @@ function Home() {
         organizations &&
         repositories &&
         owners &&
-        costCenters
+        !loadingCostCenters
     );
 
     const preparedAuthors = useMemo<string[]>(() => {
@@ -388,6 +392,7 @@ function Home() {
                             onChangeValue={setOrganization}
                         />
                     </Grid>
+                    {costCenters !== undefined && (
                     <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Cost Center"
@@ -396,6 +401,7 @@ function Home() {
                             onChangeValue={setCostCenter}
                         />
                     </Grid>
+                    )}
                     <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
                             label="Author"

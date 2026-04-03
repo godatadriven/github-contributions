@@ -5,5 +5,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   assetsInclude: ['src/assets/github_contributions.duckdb'],
   plugins: [react()],
-  base: '/github-contributions/'
+  base: '/github-contributions/',
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+  },
 });
