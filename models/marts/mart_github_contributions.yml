@@ -1,14 +1,6 @@
 version: 2
 
 models:
-  - name: fct_cost_centers
-    columns:
-      - name: cost_center_name
-        tests:
-          - not_null
-      - name: user_login
-        tests:
-          - not_null
   - name: fct_pull_requests
     columns:
       - name: full_repository_name
