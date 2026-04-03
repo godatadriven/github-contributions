@@ -21,13 +21,72 @@ concurrency:
 env:
   DUCKDB_PATH: github_contributions.duckdb
   WORKING_DIRECTORY: ./webapp
+  DBT_PROFILES_DIR: .
+  PYTHON_VERSION: '3.12'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  # Runs dbt to produce a fresh database whenever the deploy is triggered by a
+  # code push / manual dispatch.  When the trigger is a completed dbt workflow_run
+  # the artifact from that run is already fresh, so this job is skipped.
+  rebuild_database:
+    runs-on: self-hosted
+    if: github.event_name != 'workflow_run'
+    timeout-minutes: 10080
     permissions:
       contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install dbt-duckdb==1.7.2 github_contributions/
+          dbt deps
+
+      - name: Download duckdb (incremental load from last successful run)
+        uses: dawidd6/action-download-artifact@v19
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          workflow: dbt.yml
+          workflow_conclusion: success
+        continue-on-error: true
+
+      - name: dbt build
+        run: dbt build --fail-fast
+
+      - name: Upload duckdb
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          path: ${{ env.DUCKDB_PATH }}
+          # CHANGE WITH CAUTION!!!
+          # The retention days determines how long it takes for author data to be
+          # forgotten
+          retention-days: 15
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [rebuild_database]
+    # Run when:
+    #   - rebuild_database succeeded (push / dispatch path), OR
+    #   - rebuild_database was skipped (workflow_run path) AND the triggering dbt run succeeded
+    #     on the default branch (guards against cache-poisoning from untrusted branches)
+    if: >-
+      always() &&
+      (needs.rebuild_database.result == 'success' || needs.rebuild_database.result == 'skipped') &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == github.event.repository.default_branch))
+    permissions:
+      contents: read
+      actions: read
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -35,12 +94,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Download duckdb
+      - name: Download duckdb from rebuild job
+        if: needs.rebuild_database.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.DUCKDB_PATH }}
+          path: ${{ env.WORKING_DIRECTORY }}/public/
+
+      - name: Download duckdb from completed dbt workflow
+        if: needs.rebuild_database.result == 'skipped'
         uses: dawidd6/action-download-artifact@v19
         with:
           name: ${{ env.DUCKDB_PATH }}
-          workflow: dbt.yml
-          workflow_conclusion: success
+          run_id: ${{ github.event.workflow_run.id }}
           path: ${{ env.WORKING_DIRECTORY }}/public/
 
       - name: Setup Node

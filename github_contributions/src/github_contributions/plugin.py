@@ -94,6 +94,16 @@ class Plugin(BasePlugin):
         self.enterprise = plugin_config.get("ENTERPRISE") or os.getenv("GH_ENTERPRISE") or ""
 
         self.logger = setup_logger(info=log_info, debug=log_debug)
+        if not github_token:
+            self.logger.warning(
+                "GITHUB_TOKEN is not configured – requests to the GitHub API will be "
+                "unauthenticated and are likely to be rate-limited."
+            )
+        if not self.enterprise:
+            self.logger.warning(
+                "GH_ENTERPRISE (or ENTERPRISE plugin config) is not set – "
+                "cost-center data will not be fetched."
+            )
         self.headers = frozendict.frozendict(github_api.create_headers(github_token))
         self.repositories = None
         self._initital_configure_connection_execution = True
