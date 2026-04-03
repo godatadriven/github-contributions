@@ -46,24 +46,20 @@ function Home() {
     const { db } = useDuckDb();
     const theme = useTheme();
     const defaultSelection = 'All';
-    const noCostCenter = 'None';
     const [authorFilter, setAuthorFilter] = useState<QueryFilter>();
     const [organizationFilter, setOrganizationFilter] = useState<QueryFilter>();
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
-    const [costCenterFilter, setCostCenterFilter] = useState<QueryFilter>();
-    const [starsIndex, setStarsIndex] = useState(2);
     const [starsFilter, setStarsFilter] = useState<QueryFilter>({
         column: 'rep.stargazers_count',
         operator: '>=',
-        target: '20'
+        target: '2'
     });
     const [organization, setOrganization] = useState(defaultSelection);
     const [author, setAuthor] = useState(defaultSelection);
     const [repositoryOwner, setRepositoryOwner] = useState(defaultSelection);
     const [repository, setRepository] = useState(defaultSelection);
-    const [costCenter, setCostCenter] = useState(defaultSelection);
-    const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter, costCenterFilter, starsFilter];
+    const filters = [authorFilter, organizationFilter, repositoryFilter, ownerFilter, starsFilter];
     const weekStartsQuery = `
         SELECT DATE_TRUNC('week', start_date) AS week_start
         FROM (
@@ -90,10 +86,9 @@ function Home() {
         ORDER BY orderedField
     `;
     const organizationQuery = `SELECT distinct pr.author_organization AS organization FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([starsFilter])} ORDER BY lower(pr.author_organization);`;
-    const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter, costCenterFilter, starsFilter])} ORDER BY lower(pr.author);`;
+    const authorQuery = `SELECT distinct pr.author FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([organizationFilter, starsFilter])} ORDER BY lower(pr.author);`;
     const ownerQuery = `SELECT distinct pr.owner FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, starsFilter])} ORDER BY lower(pr.owner);`;
     const repositoryQuery = `SELECT distinct pr.repository FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter([authorFilter, ownerFilter, starsFilter])} ORDER BY lower(pr.repository)`;
-    const costCenterQuery = 'SELECT distinct cc.cost_center_name FROM main_marts.fct_cost_centers cc ORDER BY lower(cc.cost_center_name);';
     const pullRequestCountQuery = `SELECT count(*) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const repoCountQuery = `SELECT count(distinct repository) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
     const contributorCountQuery = `SELECT count(distinct author) as amount FROM main_marts.fct_pull_requests pr LEFT JOIN main_marts.fct_repositories rep ON pr.full_repository_name = rep.full_name ${useQueryFilter(filters)};`;
@@ -120,7 +115,6 @@ function Home() {
     const { data: organizations } = useQuery<{ organization: string }>(organizationQuery);
     const { data: repositories } = useQuery<{ repository: string }>(repositoryQuery);
     const { data: owners } = useQuery<{ owner: string }>(ownerQuery);
-    const { data: costCenters } = useQuery<{ cost_center_name: string }>(costCenterQuery);
     const { data: pullRequestCount, loading: loadingPullRequests } = useQuery<Counter>(pullRequestCountQuery);
     const { data: repositoryCount, loading: loadingRepositories } = useQuery<Counter>(repoCountQuery);
     const { data: contributorCount, loading: loadingContributors } = useQuery<Counter>(contributorCountQuery);
@@ -137,8 +131,7 @@ function Home() {
         authors &&
         organizations &&
         repositories &&
-        owners &&
-        costCenters
+        owners
     );
 
     const preparedAuthors = useMemo<string[]>(() => {
@@ -177,16 +170,6 @@ function Home() {
         return [defaultSelection];
     }, [owners]);
 
-    const preparedCostCenters = useMemo<string[]>(() => {
-        if (costCenters) {
-            const prepData = costCenters.map(item => item.cost_center_name);
-            prepData.unshift(noCostCenter);
-            prepData.unshift(defaultSelection);
-            return prepData;
-        }
-        return [defaultSelection];
-    }, [costCenters]);
-
     const calculateValue = useCallback((value: number) => {
         const options = [0, 10, 20, 50, 100, 250, 500, 1000, 2000, 5000, 10000];
         return options[value];
@@ -198,11 +181,9 @@ function Home() {
 
     const debounceFn = debounce(setStarsFilter, 500);
     const onChangeStars = useCallback((_event: Event, newValue: number | number[]) => {
-        const index = newValue as number;
-        setStarsIndex(index);
         debounceFn({
             ...starsFilter,
-            target: calculateValue(index).toString()
+            target: calculateValue(newValue as number).toString()
         });
     }, [starsFilter, debounceFn, calculateValue]);
 
@@ -307,32 +288,6 @@ function Home() {
         resetSelections?.forEach((resetSelection) => resetSelection(defaultSelection));
     };
 
-    const onCostCenterFilterChange = (
-        value: string,
-        setFilter: (filter: QueryFilter | undefined) => void,
-        resetFilters?: ((filter: QueryFilter | undefined) => void)[],
-        resetSelections?: ((selection: string) => void)[]
-    ) => {
-        if (value === defaultSelection) {
-            setFilter(undefined);
-        } else if (value === noCostCenter) {
-            setFilter({
-                column: 'pr.author',
-                operator: 'NOT IN',
-                target: '(SELECT user_login FROM main_marts.fct_cost_centers)'
-            });
-        } else {
-            const escaped = value.replace(/'/g, '\'\'');
-            setFilter({
-                column: 'pr.author',
-                operator: 'IN',
-                target: `(SELECT user_login FROM main_marts.fct_cost_centers WHERE cost_center_name = '${escaped}')`
-            });
-        }
-        resetFilters?.forEach((resetFilter) => resetFilter(undefined));
-        resetSelections?.forEach((resetSelection) => resetSelection(defaultSelection));
-    };
-
     useEffect(() => {
         onFilterChange(
             organization,
@@ -344,21 +299,12 @@ function Home() {
     }, [organization]);
 
     useEffect(() => {
-        onCostCenterFilterChange(
-            costCenter,
-            setCostCenterFilter,
-            [setAuthorFilter],
-            [setAuthor]
-        );
-    }, [costCenter]);
-
-    useEffect(() => {
         onFilterChange(
             author,
             setAuthorFilter,
             'pr.author',
-            [setOwnerFilter, setRepositoryFilter, setCostCenterFilter],
-            [setRepositoryOwner, setRepository, setCostCenter]
+            [setOwnerFilter, setRepositoryFilter],
+            [setRepositoryOwner, setRepository]
         );
     }, [author]);
 
@@ -390,14 +336,6 @@ function Home() {
                     </Grid>
                     <Grid item xs={12} sm={12} md={2}>
                         <SelectBox
-                            label="Cost Center"
-                            value={costCenter}
-                            items={preparedCostCenters}
-                            onChangeValue={setCostCenter}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={2}>
-                        <SelectBox
                             label="Author"
                             value={author}
                             items={preparedAuthors}
@@ -425,7 +363,7 @@ function Home() {
                             label="Minimum Stars"
                             sliderProps={{
                                 max: 10,
-                                value: starsIndex,
+                                defaultValue: 2,
                                 step: 1,
                                 min: 0,
                                 size: 'small',

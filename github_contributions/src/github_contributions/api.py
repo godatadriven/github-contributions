@@ -178,40 +178,6 @@ def search_author_public_pull_requests(
     return initial_df
 
 
-def get_cost_centers(
-    enterprise: str,
-    headers: dict[str, str],
-) -> pd.DataFrame:
-    """Get cost centers and their members for a GitHub Enterprise.
-
-    Parameters
-    ----------
-    enterprise : str
-        The GitHub Enterprise slug
-    headers : dict[str, str]
-        The API call headers
-
-    Returns
-    -------
-    out : pd.DataFrame
-        A DataFrame with columns ``cost_center_name`` and ``user_login``
-    """
-    logger = logging.getLogger(__name__)
-    url = f"{GITHUB_API_BASE_URL}/enterprises/{enterprise}/settings/billing/cost-centers"
-    rows: list[dict[str, str]] = []
-    for response in paginate(url, headers=headers):
-        cost_centers = response.json().get("cost_centers", [])
-        for cost_center in cost_centers:
-            name = cost_center.get("name", "")
-            users = cost_center.get("resources", {}).get("users", [])
-            for user in users:
-                login = user.get("github_com_login", "")
-                if login:
-                    rows.append({"cost_center_name": name, "user_login": login})
-    logger.info("Fetched %d cost-center user memberships from enterprise '%s'", len(rows), enterprise)
-    return pd.DataFrame(rows, columns=["cost_center_name", "user_login"])
-
-
 def get_repository(
     initial_df: pd.DataFrame,
     repositories: set[str],

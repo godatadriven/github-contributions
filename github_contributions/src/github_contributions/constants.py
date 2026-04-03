@@ -1,7 +1,5 @@
 PRS_TABLE = "src_pull_requests"
 REPOS_TABLE = "src_repositories"
-COST_CENTERS_TABLE = "src_cost_centers"
-DEFAULT_COST_CENTER_COLUMNS = ["cost_center_name", "user_login"]
 DEFAULT_PR_COLUMNS = [
     "url",
     "repository_url",
