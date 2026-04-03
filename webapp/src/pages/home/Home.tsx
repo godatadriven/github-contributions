@@ -52,10 +52,11 @@ function Home() {
     const [repositoryFilter, setRepositoryFilter] = useState<QueryFilter>();
     const [ownerFilter, setOwnerFilter] = useState<QueryFilter>();
     const [costCenterFilter, setCostCenterFilter] = useState<QueryFilter>();
+    const [starsIndex, setStarsIndex] = useState(2);
     const [starsFilter, setStarsFilter] = useState<QueryFilter>({
         column: 'rep.stargazers_count',
         operator: '>=',
-        target: '2'
+        target: '20'
     });
     const [organization, setOrganization] = useState(defaultSelection);
     const [author, setAuthor] = useState(defaultSelection);
@@ -197,9 +198,11 @@ function Home() {
 
     const debounceFn = debounce(setStarsFilter, 500);
     const onChangeStars = useCallback((_event: Event, newValue: number | number[]) => {
+        const index = newValue as number;
+        setStarsIndex(index);
         debounceFn({
             ...starsFilter,
-            target: calculateValue(newValue as number).toString()
+            target: calculateValue(index).toString()
         });
     }, [starsFilter, debounceFn, calculateValue]);
 
@@ -422,7 +425,7 @@ function Home() {
                             label="Minimum Stars"
                             sliderProps={{
                                 max: 10,
-                                defaultValue: 2,
+                                value: starsIndex,
                                 step: 1,
                                 min: 0,
                                 size: 'small',
