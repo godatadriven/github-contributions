@@ -18,11 +18,9 @@ def _make_plugin(enterprise: str = "") -> Plugin:
     return Plugin("github_contributions", plugin_config)
 
 
-def _make_source_config(resource: str, authors: list | None = None) -> MagicMock:
+def _make_source_config(resource: str) -> MagicMock:
     """Return a mock SourceConfig that behaves like a dict."""
     data: dict = {"resource": resource}
-    if authors is not None:
-        data["authors"] = authors
     config = MagicMock()
     config.get = lambda key, default=None: data.get(key, default)
     return config
