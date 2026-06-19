@@ -33,7 +33,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download duckdb
         uses: dawidd6/action-download-artifact@v19
